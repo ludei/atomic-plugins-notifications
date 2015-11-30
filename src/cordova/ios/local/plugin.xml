@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="cocoon-plugin-notifications-ios-local" version="1.0.0">
+    <name>CocoonNotificationsLocal</name>
+    <description>Cocoon Local Notifications API</description>
+    <license>MPL 2.0</license>
+    <keywords>cordova,inapps,push,notification,local,remote,cocoon,atomic,plugins</keywords>
+    <repo>https://github.com/ludei/atomic-plugins-notifications</repo>    
+    <js-module src="www/cocoon_notifications_local.js" name="Notifications">
+        <runs/>
+    </js-module>
+
+    <platform name="ios">
+        <header-file src="src/ios/LDNotificationLocalPlugin.h" />
+        <source-file src="src/ios/LDNotificationLocalPlugin.m" />
+        <dependency id="cocoon-plugin-notifications-common" />
+    </platform>
+</plugin>
