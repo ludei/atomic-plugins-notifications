@@ -1,106 +1,148 @@
-#import "LDNotificationPlugin.h"
+#import "LDNotificationLocalPlugin.h"
 
 
-#pragma mark LDAdServicePlugin Implementation
-
-static BOOL pendingAppRegisterSettings = NO;
-static BOOL pendingRemoteRegisterSettings = NO;
-
-
-@implementation LDNotificationPlugin
+@implementation LDNotificationLocalPlugin
 {
-    CDVInvokedUrlCommand * _notificationListener;
-    NSMutableArray * _settingsRegisterHandlers;
-    NSMutableArray * _remoteRegisterHandlers;
+    BOOL _granted;
 }
+
 
 - (void)pluginInitialize
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onLocalNotification:) name:CDVLocalNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onRemoteNotification:) name:@"CDVDidReceiveRemoteNotification" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDidRegisterForRemoteNotification:) name:CDVRemoteNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onDidFailToRegisterForRemoteNotification:) name:CDVRemoteNotificationError object:nil];
+    [super pluginInitialize];
+    _scheduledNotifications = [[NSMutableDictionary alloc] init];
 }
 
-- (void)dispose
+- (void)processLocalNotification:(UILocalNotification*)notification
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)onLocalNotification:(NSNotification*)notification
-{
-
-}
-
-- (void)onRemoteNotification:(NSNotification*)notification
-{
-
-}
-
-- (void)onDidRegisterForRemoteNotification:(NSNotification*)notification
-{
-    pendingRemoteRegisterSettings = NO;
-    for (RemoteRegisterHandler handler in _remoteRegisterHandlers) {
-        handler(nil);
+    NSDictionary * userInfo = notification.userInfo ?: @{};
+    NSString * identifier = [userInfo objectForKey:COCOON_NOTIFICATION_ID];
+    if (identifier && [identifier isKindOfClass:[NSString class]]) {
+        [_scheduledNotifications removeObjectForKey:identifier];
+        NSMutableDictionary * tmp = [NSMutableDictionary dictionaryWithDictionary:userInfo];
+        [tmp removeObjectForKey:COCOON_NOTIFICATION_ID];
+        userInfo = tmp;
     }
-    [_remoteRegisterHandlers removeAllObjects];
+    [self notifyNotificationReceived:userInfo];
 }
 
-- (void)onDidFailToRegisterForRemoteNotification:(NSNotification*)notification
+-(void) register:(CDVInvokedUrlCommand *) command
 {
-    pendingRemoteRegisterSettings = NO;
-    for (RemoteRegisterHandler handler in _remoteRegisterHandlers) {
-        handler(nil);
-    }
-    [_remoteRegisterHandlers removeAllObjects];
+    UIUserNotificationType types = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
+    UIUserNotificationSettings * settings = [UIUserNotificationSettings settingsForTypes:types categories:nil];
+    
+    [self registerUserNotificationSettings:settings handler:^(UIUserNotificationSettings *result) {
+        
+        CDVPluginResult * pluginResult;
+        if (result.types != UIUserNotificationTypeNone) {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            _granted = YES;
+        }
+        else {
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:@{@"code":@0, @"message":@"Access denied by user"}];
+            _granted = NO;
+        }
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        
+    }];
 }
 
-
-- (void)registerUserNotificationSettings:(UIUserNotificationSettings *)settings handler:(SettingsRegisterHandler) handler
+-(void) unregister:(CDVInvokedUrlCommand *) command
 {
-    if (!pendingAppRegisterSettings) {
-        pendingAppRegisterSettings = YES;
-        [_settingsRegisterHandlers addObject:handler];
-        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
-    }
+    UIUserNotificationType types = UIUserNotificationTypeNone;
+    UIUserNotificationSettings * settings = [UIUserNotificationSettings settingsForTypes:types categories:nil];
+    
+    [self registerUserNotificationSettings:settings handler:^(UIUserNotificationSettings *result) {
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+    }];
 }
 
-- (void)registerForRemoteNotifications:(RemoteRegisterHandler)handler
+-(void) isRegistered:(CDVInvokedUrlCommand *) command
 {
     UIApplication * app = [UIApplication sharedApplication];
-    BOOL alreadyRegistered = NO;
-    if ([app respondsToSelector:@selector(isRegisteredForRemoteNotifications)]) {
-        alreadyRegistered = [app isRegisteredForRemoteNotifications];
+    BOOL result = _granted;
+    if ([app respondsToSelector:@selector(currentUserNotificationSettings)]) {
+        result = app.currentUserNotificationSettings != UIUserNotificationTypeNone;
     }
-    if (alreadyRegistered) {
-        handler(nil);
-        return;
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:result] callbackId:command.callbackId];
+}
+
+
+-(void) send:(CDVInvokedUrlCommand *) command
+{
+    NSString * identifier = [command argumentAtIndex:0 withDefault:@"notId" andClass:[NSString class]];
+    NSDictionary * data = [command argumentAtIndex:1 withDefault:@{} andClass:[NSDictionary class]];
+    
+    UILocalNotification * notification = [[UILocalNotification alloc] init];
+    notification.timeZone = [NSTimeZone defaultTimeZone];
+    notification.alertBody = [data objectForKey:@"message"] ?: @"";
+    notification.alertTitle = [data objectForKey:@"title"] ?: @"";
+    NSNumber * soundEnabled = [data objectForKey:@"soundEnabled"];
+    if (soundEnabled && [soundEnabled isKindOfClass:[NSNumber class]]) {
+        notification.soundName = soundEnabled.boolValue ? UILocalNotificationDefaultSoundName : nil;
+    }
+    else {
+        notification.soundName = UILocalNotificationDefaultSoundName; //default value
+    }
+    NSNumber * badge = [data objectForKey:@"badgeNumber"];
+    if (badge && [badge isKindOfClass:[NSNumber class]]) {
+        notification.applicationIconBadgeNumber = badge.integerValue;
     }
     
-    if (!pendingRemoteRegisterSettings) {
-        pendingRemoteRegisterSettings = YES;
-        [_remoteRegisterHandlers addObject:handler];
-        [[UIApplication sharedApplication] registerForRemoteNotifications];
+    NSNumber * date = [data objectForKey:@"date"];
+    if (date && [date isKindOfClass:[NSNumber class]]) {
+         notification.fireDate = [NSDate dateWithTimeIntervalSince1970:date.doubleValue/1000.0];
+    }
+    else {
+        notification.fireDate = [NSDate.date dateByAddingTimeInterval:1.0];
+    }
+    
+    NSMutableDictionary * info = [NSMutableDictionary dictionary];
+    NSDictionary * userData = [data objectForKey:@"userData"];
+    if (userData && [userData isKindOfClass:[NSDictionary class]]) {
+        [info setValuesForKeysWithDictionary:userData];
+    }
+
+    [info setObject:identifier forKey:COCOON_NOTIFICATION_ID];
+    notification.userInfo = info;
+    
+    [_scheduledNotifications setObject:notification forKey:identifier];
+    if (notification.fireDate) {
+        [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+    }
+    else {
+        [[UIApplication sharedApplication] presentLocalNotificationNow:notification];
     }
 }
 
-#pragma mark Common Notification API
-
--(void) setListener:(CDVInvokedUrlCommand*) command
+-(void) subscribe:(CDVInvokedUrlCommand *) command
 {
-    _notificationListener = command;
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
 }
 
--(void) initialize:(CDVInvokedUrlCommand *) command
+-(void) unsubscribe:(CDVInvokedUrlCommand *) command
 {
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+}
+
+-(void) cancel:(CDVInvokedUrlCommand *) command
+{
+    NSString * identifier = [command argumentAtIndex:0 withDefault:@"notId" andClass:[NSString class]];
+    UILocalNotification * localNotification = [_scheduledNotifications objectForKey:identifier];
+    if (localNotification) {
+        [[UIApplication sharedApplication] cancelLocalNotification:localNotification];
+        [_scheduledNotifications removeObjectForKey:identifier];
+    }
     
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
 }
 
-
--(NSDictionary *) errorToDic:(NSError * ) error
+-(void) cancelAllNotifications:(CDVInvokedUrlCommand *) command
 {
-    return @{@"code":[NSNumber numberWithInteger:error.code], @"message":error.localizedDescription?:@"Unkown error"};
+    [[UIApplication sharedApplication] cancelAllLocalNotifications];
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
 }
+
 
 
 @end

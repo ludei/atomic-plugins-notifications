@@ -5,23 +5,11 @@
 //
 //
 
-#import <Foundation/Foundation.h>
-#import <Cordova/CDVPlugin.h>
+#import "LDNotificationPlugin.h"
 
 
-typedef void (^SettingsRegisterHandler)(UIUserNotificationSettings * result);
-typedef void (^RemoteRegisterHandler)(NSError * error);
+@interface LDNotificationLocalPlugin : LDNotificationPlugin
 
-@interface LDNotificationPlugin : CDVPlugin
-
-@property (nonatomic, strong) NSString * remoteToken;
-
-- (void)onLocalNotification:(NSNotification*)notification;
-- (void)onRemoteNotification:(NSNotification*)notification;
-- (void)onDidRegisterForRemoteNotification:(NSNotification*)notification;
-- (void)onDidFailToRegisterForRemoteNotification:(NSNotification*)notification;
-
-- (void)registerUserNotificationSettings:(UIUserNotificationSettings *)settings handler:(SettingsRegisterHandler) handler;
-- (void)registerForRemoteNotifications:(RemoteRegisterHandler)handler;
+@property (nonatomic, strong) NSMutableDictionary * scheduledNotifications;
 
 @end

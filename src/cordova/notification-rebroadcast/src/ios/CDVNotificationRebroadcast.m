@@ -91,6 +91,9 @@ static BOOL cdvLocalNotifSelExchanged = NO;
 static BOOL cdvRemoteNotifSelExchanged = NO;
 static BOOL cdvRemoteNotifErrorSelExchanged = NO;
 static BOOL cdvRemoteNotifReceiveSelExchanged = NO;
+static BOOL cdvDidRegisterUserNotificationSettings = NO;
+static UILocalNotification * launchLocalNotification = nil;
+
 
 #pragma mark CDVAppDelegate (SwizzledMethods)
 
@@ -106,8 +109,17 @@ static BOOL cdvRemoteNotifReceiveSelExchanged = NO;
     cdvRemoteNotifSelExchanged = MethodSwizzle(clazz, @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:), @selector(cdv_notification_rebroadcastApplication:didRegisterForRemoteNotificationsWithDeviceToken:));
     cdvRemoteNotifErrorSelExchanged = MethodSwizzle(clazz, @selector(application:didFailToRegisterForRemoteNotificationsWithError:), @selector(cdv_notification_rebroadcastApplication:didFailToRegisterForRemoteNotificationsWithError:));
     cdvRemoteNotifReceiveSelExchanged = MethodSwizzle(clazz, @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:), @selector(cdv_notification_rebroadcastApplication:didReceiveRemoteNotification:fetchCompletionHandler:));
+    cdvDidRegisterUserNotificationSettings = MethodSwizzle(clazz, @selector(application:didRegisterUserNotificationSettings:), @selector(cdv_notification_rebroadcastApplication:didRegisterUserNotificationSettings:));
     });
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(launchNotificationChecker:) name:@"UIApplicationDidFinishLaunchingNotification" object:nil];
 
+}
+
++ (void)launchNotificationChecker:(NSNotification *)notification
+{
+    NSDictionary *launchOptions = [notification userInfo] ;
+    launchLocalNotification = [launchOptions objectForKey: @"UIApplicationLaunchOptionsLocalNotificationKey"];
 }
 
 - (void) cdv_notification_rebroadcastApplication:(UIApplication*)application didReceiveLocalNotification:(UILocalNotification*)notification
@@ -157,6 +169,15 @@ static BOOL cdvRemoteNotifReceiveSelExchanged = NO;
     // if method was exchanged through method_exchangeImplementations, we call ourselves (no, it's not a recursion)
     if (cdvRemoteNotifReceiveSelExchanged) {
         [self cdv_notification_rebroadcastApplication:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:handler];
+    }
+}
+
+- (void) cdv_notification_rebroadcastApplication:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *) settings
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"CDVDidRegisterUserNotificationSettings" object:settings];
+    
+    if (cdvDidRegisterUserNotificationSettings) {
+        [self cdv_notification_rebroadcastApplication:application didRegisterUserNotificationSettings:settings];
     }
 }
 
@@ -234,6 +255,11 @@ static BOOL cdvRemoteNotifReceiveSelExchanged = NO;
     NSString* jsString = [NSString stringWithFormat:@"cordova.fireDocumentEvent('CDVRemoteNotificationError', { 'error': '%@'});", desc];
     
     [self.commandDelegate evalJs:jsString];
+}
+
++(UILocalNotification*) getLaunchLocalNotification
+{
+    return launchLocalNotification;
 }
 
 

@@ -13,6 +13,13 @@
     <platform name="ios">
         <header-file src="src/ios/LDNotificationLocalPlugin.h" />
         <source-file src="src/ios/LDNotificationLocalPlugin.m" />
+
+         <config-file target="config.xml" parent="/*">
+            <feature name="LDNotificationLocalPlugin">
+                <param name="ios-package" value="LDNotificationLocalPlugin" />
+            </feature>
+        </config-file>
+        
         <dependency id="cocoon-plugin-notifications-common" />
     </platform>
 </plugin>

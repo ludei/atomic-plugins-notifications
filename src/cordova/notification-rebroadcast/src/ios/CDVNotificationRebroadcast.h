@@ -29,8 +29,12 @@
 
 - (void) cdv_notification_rebroadcastApplication:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *) userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))handler;
 
+- (void) cdv_notification_rebroadcastApplication:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *) settings;
+
 @end
 
 @interface CDVNotificationRebroadcast : CDVPlugin
+
++(UILocalNotification*) getLaunchLocalNotification;
 
 @end
