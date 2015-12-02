@@ -2,9 +2,7 @@
 
 (function(){
 
-    var backgroundTexture;
-    var button1Texture;
-    var button2Texture;
+    var backgroundTexture, button1Texture, button2Texture, backTexture;
     var btnRegister, btnUnregister, btnSubscribe, btnUnsubscribe, btnSend, btnCancel, btnCancelAll;
 
     var targetService;
@@ -25,11 +23,12 @@
 
             if (localService) {
                 localService.on('notification', function(userData){
-                    debugger;
                     alert('Received local notification: ' + JSON.stringify(userData));
                 });
 
-                localService.initialize();
+                localService.initialize({}, function(registered){
+                    localService.registered = registered;
+                });
             }
 
             if (pushService) {
@@ -37,12 +36,19 @@
                     alert('Received push notification: ' + JSON.stringify(userData));
                 });
 
-                localService.initialize();
+                pushService.initialize({appId: "HzEoGOQvoLgFa0vtsowsljQP4g3KBO3p6N033WZx", clientKey: "gKtKVnIg4JKAc5O5hbk8tHshAU4LDv0iEJ1VSlDO"}, function(registered, error){
+                    pushService.registered = registered;
+                    if (error) {
+                        alert('Error initializing Parse:' + error.message);
+                    }
+                });
             }
         }
     }
 
     function showProviderSelector() {
+
+        container.removeChildren();
 
         var btnTestLocal = createButton("Local Notifications", function(){
             if (!localService) {
@@ -76,7 +82,7 @@
 
         var push = targetService === pushService;
 
-         //Add buttons
+        //Add buttons
         btnRegister = createButton(push ? "Register For Push Notifications" : "Register for Local Notifications", function(){
             targetService.register({}, function(error){
                 btnRegister.visible = !!error;
@@ -87,6 +93,8 @@
             });
         });
 
+        btnRegister.visible = !targetService.registered;
+
         btnUnregister = createButton(push ? "Unregister from Push Notifications" : "Unregister from Local Notifications", function(){
             targetService.unregister(function(error){
                 btnUnregister.visible = !!error;
@@ -96,23 +104,30 @@
                 }
             });
         });
+        btnUnregister.visible = !!targetService.registered;
 
         btnSubscribe = createButton("Subscribe push channel", function(){
-            targetService.subscribe(function(error){
+            targetService.subscribe("testchannel", function(error){
                 btnSubscribe.visible = !!error;
                 btnUnsubscribe.visible = !btnSubscribe.visible;
+                if (error) {
+                    alert('Error: ' + error.message);
+                }
             });
         });
 
         btnUnsubscribe = createButton("Unsubscribe push channel", function(){
-            targetService.unsubscribe(function(error){
+            targetService.unsubscribe("testchannel", function(error){
                 btnUnsubscribe.visible = !!error;
                 btnSubscribe.visible = !btnUnsubscribe.visible;
+                if (error) {
+                    alert('Error: ' + error.message);
+                }
             });
         });
 
 
-        btnSend = createButton(push ? "Send push notification (5 sec)" : "Send local notification (5 sec)", function(){
+        btnSend = createButton(push ? "Send client test push notification" : "Send local notification (5 sec)", function(){
 
             index++;
             var notification = {
@@ -153,43 +168,62 @@
         });
 
 
-
-        btnRegister.position.set(0, -250);
-        container.addChild(btnRegister);
-        btnUnregister.position.set(0, -250);
-        btnUnregister.visible = false;
-        container.addChild(btnUnregister);
-
-        btnSend.position.set(0, -150);
-        container.addChild(btnSend);
-
-        btnCancel.position.set(0, -50);
-        container.addChild(btnCancel);
-
-        btnCancelAll.position.set(0, 50);
-        container.addChild(btnCancelAll);
+        var btnBack = createBackButton(function(){
+            showProviderSelector();
+        });
 
         if (targetService === pushService) {
-            btnSubscribe.position.set(0, 150);
+            btnRegister.position.set(0, -150);
+            container.addChild(btnRegister);
+            btnUnregister.position.set(0, -150);
+            container.addChild(btnUnregister);
+
+            btnSubscribe.position.set(0, -50);
             container.addChild(btnSubscribe);
-            btnUnsubscribe.position.set(0, 150);
+            btnUnsubscribe.position.set(0, -50);
             btnUnsubscribe.visible = false;
             container.addChild(btnUnsubscribe);
 
-            btnResetBadge.position.set(0, 250);
+            btnSend.position.set(0, 50);
+            container.addChild(btnSend);
+
+            btnResetBadge.position.set(0, 150);
             container.addChild(btnResetBadge);
+
+            targetService.fetchSubscribedChannels(function(channels, error) {
+                var subscribed = !error && channels && channels.length > 0;
+                btnSubscribe.visible = !subscribed;
+                btnUnsubscribe.visible = subscribed;
+            });
         }
         else {
+            btnRegister.position.set(0, -250);
+            container.addChild(btnRegister);
+            btnUnregister.position.set(0, -250);
+            container.addChild(btnUnregister);
+
+            btnSend.position.set(0, -150);
+            container.addChild(btnSend);
+
+            btnCancel.position.set(0, -50);
+            container.addChild(btnCancel);
+
+            btnCancelAll.position.set(0, 50);
+            container.addChild(btnCancelAll);
+
             btnResetBadge.position.set(0, 150);
             container.addChild(btnResetBadge);
         }
 
+        btnBack.position.set(0, 300);
+        container.addChild(btnBack);
 
 
         targetService.isRegistered(function(granted){
             btnUnregister.visible = !!granted;
             btnRegister.visible = !granted;
         });
+
     }
 
     function initDemo(){
@@ -206,6 +240,7 @@
         backgroundTexture = PIXI.Texture.fromImage('./images/background.jpg');
         button1Texture = PIXI.Texture.fromImage('./images/button1.png');
         button2Texture = PIXI.Texture.fromImage('./images/button2.png');
+        backTexture = PIXI.Texture.fromImage('./images/back.png');
 
         var stage = new PIXI.Container();
         stage.interactive = true;
@@ -247,6 +282,17 @@
             this.texture = button1Texture;
         };
 
+        return button;
+    }
+
+    function createBackButton(callback) {
+        var button = new PIXI.Sprite(backTexture);
+        button.anchor.set(0.5, 0.5);
+        button.interactive = true;
+        button.addChild(createText("Back"));
+        button.mousedown = button.touchstart = function(){
+            callback();
+        };
         return button;
     }
 

@@ -10,19 +10,24 @@
 
 
 typedef void (^SettingsRegisterHandler)(UIUserNotificationSettings * result);
-typedef void (^RemoteRegisterHandler)(NSError * error);
+typedef void (^RemoteRegisterHandler)(NSData * deviceToken, NSError * error);
 #define COCOON_NOTIFICATION_ID @"CocoonNotificationId"
 
 @interface LDNotificationPlugin : CDVPlugin
 
 @property (nonatomic, assign) BOOL ready;
 @property (nonatomic, strong) NSString * remoteToken;
+@property (nonatomic, strong) NSMutableArray * pendingLocalNotifications; //stored notifications until the user has set up the notification listeners in JS
+@property (nonatomic, strong) NSMutableArray * pendingRemoteNotifications;
 
 - (void)processLocalNotification:(UILocalNotification*)notification;
-- (void)processRemoteNotification:(NSNotification*)notification;
+- (void)processRemoteNotification:(NSDictionary *)userInfo;
 - (void)registerUserNotificationSettings:(UIUserNotificationSettings *)settings handler:(SettingsRegisterHandler) handler;
 - (void)registerForRemoteNotifications:(RemoteRegisterHandler)handler;
 - (void)notifyNotificationReceived:(NSDictionary* ) userData;
+- (void)start;
+- (void) fillApplicationState: (NSMutableDictionary *) dic;
+-(NSDictionary *) errorToDic:(NSError * ) error;
 
 @end
 
@@ -41,6 +46,6 @@ typedef void (^RemoteRegisterHandler)(NSError * error);
 
 - (void) cdv_notification_rebroadcastApplication:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *) settings;
 
-+ (UILocalNotification*) localLaunchNotification;
++ (NSDictionary*) launchOptions;
 
 @end

@@ -16,9 +16,12 @@
      *
      * Cocoon.Notification.Local.initialize(); //ready to start receiving notification callbacks
      *
-     * // Register the application to receive notifications. It may show a Dialog to request user permissions.
-     * Cocoon.Notification.Local.register({}, function(error) {
-     *  if (error) {
+     *  // Initialize the service. Ready to start receiving notification callbacks
+     *  // Auto register the application to receive notifications. It may show a Dialog to request user permissions.
+     *  // You can disable autoregister witht {register:false} params and call Cocoon.Notification.Local.register() manually
+     *
+     * Cocoon.Notification.Local.initialize({}, function(registered) {
+     *  if (!registered) {
      *      alert('Notifications disabled by user')
      *  }
      *  else {
@@ -72,13 +75,21 @@
          * Because of this, you should have set your event handler before calling this method, so you won't lose any callback.
          * @memberof Cocoon.Notification.NotificationService
          * @function initialize
+         * @param {Object} params. Service dependant params
+         * @param {Function} callback The callback function. It receives the following parameters:
+         * - Registered: True if the devices is already registered to receive notifications
+         * - Error.
          */
-        proto.initialize = function() {
+        proto.initialize = function(params, callback) {
             var me = this;
             Cocoon.exec(this.serviceName, "setListener", [], function(data) {
                 me.signal.emit('notification', null, [data]);
             });
-            Cocoon.exec(this.serviceName, 'initialize', []);
+            Cocoon.exec(this.serviceName, 'initialize', [params], callback, function(error){
+                if (callback) {
+                    callback(false, error);
+                }
+            });
         };
 
 
@@ -103,7 +114,7 @@
          */
         proto.register = function(params, callback) {
             Cocoon.exec(this.serviceName, 'register', [params], callback, callback);
-        },
+        };
 
         /**
         * Unregisters the application from receiving push notifications
@@ -135,6 +146,7 @@
 
         /**
          * Subscribes to a channel in order to receive notifications targeted to that channel.
+         * Valid for notification services that support specific channels (e.g. Parse).
          * @function subscribe
          * @memberOf Cocoon.Notification.NotificationService
          * @param {string} channel The channel id
@@ -147,6 +159,7 @@
 
         /**
          * Unsubscribes from a channel in order to stop receiving notifications targeted to it.
+         * Valid for notification services that support specific channels (e.g. Parse).
          * @function unsubscribe
          * @memberOf Cocoon.Notification.NotificationService
          * @param {string} channel The channel id
@@ -155,6 +168,23 @@
          */
         proto.unsubscribe = function(channel, callback) {
             Cocoon.exec(this.serviceName, 'unsubscribe', [channel], callback, callback);
+        };
+
+        /**
+         * Asynchronously get all the channels that this device is subscribed to.
+         * Valid for notification services that support specific channels (e.g. Parse).
+         * @function fetchSubscribedChannels
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {Function} callback Callback function to get the channel list. It receives the following parameters:
+         * - channels {array} the channels that this device is subscribed to
+         * - error.
+         */
+        proto.fetchSubscribedChannels = function(callback) {
+            Cocoon.exec(this.serviceName, 'fetchSubscribedChannels', [], callback, function(error){
+                if (callback) {
+                    callback([], error);
+                }
+            });
         };
 
         /**

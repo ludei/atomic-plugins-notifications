@@ -5,16 +5,13 @@
 
 static BOOL pendingAppRegisterSettings = NO;
 static BOOL pendingRemoteRegisterSettings = NO;
-static BOOL processedLaunchNotifications = NO;
-
 
 @implementation LDNotificationPlugin
 {
     CDVInvokedUrlCommand * _notificationListener;
     NSMutableArray * _settingsRegisterHandlers;
     NSMutableArray * _remoteRegisterHandlers;
-    NSMutableArray * _pendingLocalNotifications; //stored notifications until the user has set up the notification listeners in JS
-    NSMutableArray * _pendingRemoteNotifications;
+    NSData * _deviceToken;
 }
 
 - (void)pluginInitialize
@@ -29,12 +26,6 @@ static BOOL processedLaunchNotifications = NO;
     _remoteRegisterHandlers = [[NSMutableArray alloc] init];
     _pendingLocalNotifications = [[NSMutableArray alloc] init];
     _pendingRemoteNotifications = [[NSMutableArray alloc] init];
-    
-    UILocalNotification * launchNotification = [CDVAppDelegate localLaunchNotification];
-    if (launchNotification && !processedLaunchNotifications) {
-        [_pendingLocalNotifications addObject:launchNotification];
-        processedLaunchNotifications = YES;
-    }
 }
 
 - (void)dispose
@@ -43,12 +34,12 @@ static BOOL processedLaunchNotifications = NO;
 }
 
 
-- (void)processLocalNotification:(NSNotification*)notification
+- (void)processLocalNotification:(UILocalNotification*)notification
 {
     //Overridden in derived classes
 }
 
-- (void)processRemoteNotification:(NSNotification*)notification
+- (void)processRemoteNotification:(NSDictionary*)userInfo
 {
     //Overridden in derived classes
 }
@@ -59,34 +50,36 @@ static BOOL processedLaunchNotifications = NO;
         [self processLocalNotification:notification.object];
     }
     else {
-        [_pendingLocalNotifications addObject:notification];
+        [_pendingLocalNotifications addObject:notification.object];
     }
 }
 
 - (void)onRemoteNotification:(NSNotification*)notification
 {
     if (_ready) {
-        [self processRemoteNotification:notification];
+        [self processRemoteNotification:notification.object];
     }
     else {
-        [_pendingRemoteNotifications addObject:notification];
+        [_pendingRemoteNotifications addObject:notification.object];
     }
 }
 
 - (void)onDidRegisterForRemoteNotification:(NSNotification*)notification
 {
+    _deviceToken = notification.object;
     pendingRemoteRegisterSettings = NO;
     for (RemoteRegisterHandler handler in _remoteRegisterHandlers) {
-        handler(nil);
+        handler(_deviceToken, nil);
     }
     [_remoteRegisterHandlers removeAllObjects];
 }
 
 - (void)onDidFailToRegisterForRemoteNotification:(NSNotification*)notification
 {
+    NSError* error = notification.object;
     pendingRemoteRegisterSettings = NO;
     for (RemoteRegisterHandler handler in _remoteRegisterHandlers) {
-        handler(nil);
+        handler(nil, error);
     }
     [_remoteRegisterHandlers removeAllObjects];
 }
@@ -118,7 +111,7 @@ static BOOL processedLaunchNotifications = NO;
         alreadyRegistered = [app isRegisteredForRemoteNotifications];
     }
     if (alreadyRegistered) {
-        handler(nil);
+        handler(_deviceToken,nil);
         return;
     }
     
@@ -139,26 +132,39 @@ static BOOL processedLaunchNotifications = NO;
     
 }
 
+-(void) start
+{
+    _ready = YES;
+    for (UILocalNotification * notification in _pendingLocalNotifications) {
+        [self processLocalNotification:notification];
+    }
+    for (NSDictionary * userInfo in _pendingRemoteNotifications) {
+        [self processRemoteNotification:userInfo];
+    }
+    [_pendingLocalNotifications removeAllObjects];
+    [_pendingRemoteNotifications removeAllObjects];
+}
+
+-(void) fillApplicationState:(NSMutableDictionary *) dic
+{
+    UIApplication *app = [UIApplication sharedApplication];
+    NSString * key = @"applicationState";
+    if(app.applicationState == UIApplicationStateInactive) {
+        [dic setObject:@"inactive" forKey:key];
+    }
+    else if (app.applicationState == UIApplicationStateBackground) {
+        [dic setObject:@"background" forKey:key];
+    }
+    else {
+        [dic setObject:@"active" forKey:key];
+    }
+}
+
 #pragma mark Common Notification API
 
 -(void) setListener:(CDVInvokedUrlCommand*) command
 {
     _notificationListener = command;
-}
-
-
--(void) initialize:(CDVInvokedUrlCommand*) command
-{
-    _ready = YES;
-    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
-    for (UILocalNotification * notification in _pendingLocalNotifications) {
-        [self processLocalNotification:notification];
-    }
-    for (NSNotification * notification in _pendingRemoteNotifications) {
-        [self processRemoteNotification:notification];
-    }
-    [_pendingLocalNotifications removeAllObjects];
-    [_pendingRemoteNotifications removeAllObjects];
 }
 
 
@@ -188,7 +194,7 @@ static BOOL processedLaunchNotifications = NO;
 -(void) getBadgeNumber:(CDVInvokedUrlCommand*) command
 {
     NSInteger value = [UIApplication sharedApplication].applicationIconBadgeNumber;
-    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsNSInteger:value] callbackId:command.callbackId];
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsInt:(int)value] callbackId:command.callbackId];
 }
 
 
@@ -278,7 +284,7 @@ static BOOL ldRemoteNotifSelExchanged = NO;
 static BOOL ldRemoteNotifErrorSelExchanged = NO;
 static BOOL ldRemoteNotifReceiveSelExchanged = NO;
 static BOOL ldDidRegisterUserNotificationSettings = NO;
-static UILocalNotification * ldLaunchLocalNotification = nil;
+static NSDictionary * ldLaunchOptions = nil;
 
 
 #pragma mark CDVAppDelegate (SwizzledMethods)
@@ -304,8 +310,7 @@ static UILocalNotification * ldLaunchLocalNotification = nil;
 
 + (void)launchNotificationChecker:(NSNotification *)notification
 {
-    NSDictionary *launchOptions = [notification userInfo] ;
-    ldLaunchLocalNotification = [launchOptions objectForKey: @"UIApplicationLaunchOptionsLocalNotificationKey"];
+    ldLaunchOptions = notification.userInfo;
 }
 
 - (void) cdv_notification_rebroadcastApplication:(UIApplication*)application didReceiveLocalNotification:(UILocalNotification*)notification
@@ -321,13 +326,7 @@ static UILocalNotification * ldLaunchLocalNotification = nil;
 
 - (void) cdv_notification_rebroadcastApplication:(UIApplication*)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken;
 {
-    // re-post ( broadcast )
-    NSString* token = [[[[deviceToken description]
-                         stringByReplacingOccurrencesOfString:@"<" withString:@""]
-                        stringByReplacingOccurrencesOfString:@">" withString:@""]
-                       stringByReplacingOccurrencesOfString:@" " withString:@""];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"LDDidRegisterForRemoteNotificationsWithDeviceToken" object:token];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"LDDidRegisterForRemoteNotificationsWithDeviceToken" object:deviceToken];
     
     // if method was exchanged through method_exchangeImplementations, we call ourselves (no, it's not a recursion)
     if (ldRemoteNotifSelExchanged) {
@@ -356,6 +355,8 @@ static UILocalNotification * ldLaunchLocalNotification = nil;
     if (ldRemoteNotifReceiveSelExchanged) {
         [self cdv_notification_rebroadcastApplication:application didReceiveRemoteNotification:userInfo fetchCompletionHandler:handler];
     }
+    
+    handler(UIBackgroundFetchResultNewData);
 }
 
 - (void) cdv_notification_rebroadcastApplication:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *) settings
@@ -367,9 +368,9 @@ static UILocalNotification * ldLaunchLocalNotification = nil;
     }
 }
 
-+ (UILocalNotification*) localLaunchNotification
++ (NSDictionary*) launchOptions
 {
-    return ldLaunchLocalNotification;
+    return ldLaunchOptions;
 }
 
 @end

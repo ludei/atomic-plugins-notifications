@@ -4,7 +4,7 @@
   "description": "Cocoon Local Notifications Plugin",
   "cordova": {
     "id": "cocoon-plugin-notifications-ios-local",
-    "platforms": []
+    "platforms": ["ios"]
   },
   "repository": {
     "type": "git",

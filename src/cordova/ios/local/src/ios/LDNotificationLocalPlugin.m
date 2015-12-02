@@ -1,5 +1,6 @@
 #import "LDNotificationLocalPlugin.h"
 
+static BOOL processedLaunchNotifications = NO;
 
 @implementation LDNotificationLocalPlugin
 {
@@ -11,19 +12,58 @@
 {
     [super pluginInitialize];
     _scheduledNotifications = [[NSMutableDictionary alloc] init];
+    
+    if (!processedLaunchNotifications) {
+        NSDictionary * launchOptions = [CDVAppDelegate launchOptions];
+        if (launchOptions) {
+            UILocalNotification * localNotification = [launchOptions objectForKey:@"UIApplicationLaunchOptionsLocalNotificationKey"];
+            if (localNotification) {
+                [self.pendingLocalNotifications addObject:localNotification];
+            }
+        }
+        processedLaunchNotifications = YES;
+    }
+}
+
+-(BOOL) isRegistered
+{
+    UIApplication * app = [UIApplication sharedApplication];
+    BOOL result = _granted;
+    if ([app respondsToSelector:@selector(currentUserNotificationSettings)]) {
+        result = app.currentUserNotificationSettings.types != UIUserNotificationTypeNone;
+    }
+    return result;
 }
 
 - (void)processLocalNotification:(UILocalNotification*)notification
 {
-    NSDictionary * userInfo = notification.userInfo ?: @{};
+    NSMutableDictionary * userInfo = [NSMutableDictionary dictionaryWithDictionary: notification.userInfo ?: @{}];
     NSString * identifier = [userInfo objectForKey:COCOON_NOTIFICATION_ID];
     if (identifier && [identifier isKindOfClass:[NSString class]]) {
         [_scheduledNotifications removeObjectForKey:identifier];
-        NSMutableDictionary * tmp = [NSMutableDictionary dictionaryWithDictionary:userInfo];
-        [tmp removeObjectForKey:COCOON_NOTIFICATION_ID];
-        userInfo = tmp;
+        [userInfo removeObjectForKey:COCOON_NOTIFICATION_ID];
     }
+    [super fillApplicationState: userInfo];
     [self notifyNotificationReceived:userInfo];
+}
+
+-(void) initialize:(CDVInvokedUrlCommand *) command
+{
+    NSDictionary * params = [command argumentAtIndex:0 withDefault:@{} andClass:[NSDictionary class]];
+    NSNumber * value = [params objectForKey:@"register"];
+    BOOL autoregister = value ? value.boolValue : YES;
+    BOOL granted = [self isRegistered];
+    if (autoregister && !granted) {
+        UIUserNotificationType types = UIUserNotificationTypeBadge | UIUserNotificationTypeSound | UIUserNotificationTypeAlert;
+        UIUserNotificationSettings * settings = [UIUserNotificationSettings settingsForTypes:types categories:nil];
+        [self registerUserNotificationSettings:settings handler:^(UIUserNotificationSettings *result) {
+            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:result.types != UIUserNotificationTypeNone] callbackId:command.callbackId];
+        }];
+    }
+    else {
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:granted] callbackId:command.callbackId];
+    }
+    [super start];
 }
 
 -(void) register:(CDVInvokedUrlCommand *) command
@@ -57,13 +97,10 @@
     }];
 }
 
+
 -(void) isRegistered:(CDVInvokedUrlCommand *) command
 {
-    UIApplication * app = [UIApplication sharedApplication];
-    BOOL result = _granted;
-    if ([app respondsToSelector:@selector(currentUserNotificationSettings)]) {
-        result = app.currentUserNotificationSettings != UIUserNotificationTypeNone;
-    }
+    BOOL result = [self isRegistered];
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:result] callbackId:command.callbackId];
 }
 
@@ -123,6 +160,11 @@
 -(void) unsubscribe:(CDVInvokedUrlCommand *) command
 {
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+}
+
+-(void) fetchSubscribedChannels: (CDVInvokedUrlCommand* ) command
+{
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:@[]] callbackId:command.callbackId];
 }
 
 -(void) cancel:(CDVInvokedUrlCommand *) command

@@ -4,7 +4,7 @@
   "description": "Cocoon Local and Remote Notifications API",
   "cordova": {
     "id": "cocoon-plugin-notifications-common",
-    "platforms": []
+    "platforms": ["android", "ios"]
   },
   "repository": {
     "type": "git",

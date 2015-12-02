@@ -13,7 +13,6 @@
     <platform name="ios">
         <header-file src="src/ios/LDNotificationPlugin.h" />
         <source-file src="src/ios/LDNotificationPlugin.m" />
-        <dependency id="org.apache.cordova.labs.notification-rebroadcast" />
     </platform>
 
     <dependency id="cocoon-plugin-common" />
