@@ -68,7 +68,14 @@
         extension.NotificationService = NotificationService;
         var proto = NotificationService.prototype;
 
-
+        //clean unwanted "OK" result param on android
+        function successFunc(callback) {
+            return function() {
+                if (callback) {
+                    callback();
+                }
+            }
+        }
 
         /**
          * Starts the Notification Service. The notification callbacks will start to be received after calling this method.
@@ -85,7 +92,7 @@
             Cocoon.exec(this.serviceName, "setListener", [], function(data) {
                 me.signal.emit('notification', null, [data]);
             });
-            Cocoon.exec(this.serviceName, 'initialize', [params], callback, function(error){
+            Cocoon.exec(this.serviceName, 'initialize', [params], successFunc(callback), function(error){
                 if (callback) {
                     callback(false, error);
                 }
@@ -113,7 +120,7 @@
          * - Error.
          */
         proto.register = function(params, callback) {
-            Cocoon.exec(this.serviceName, 'register', [params], callback, callback);
+            Cocoon.exec(this.serviceName, 'register', [params], successFunc(callback), callback);
         };
 
         /**
@@ -125,7 +132,7 @@
          * - Error.
          */
         proto.unregister = function(callback) {
-            Cocoon.exec(this.serviceName, 'unregister', [], callback, callback);
+            Cocoon.exec(this.serviceName, 'unregister', [], successFunc(callback), callback);
         };
 
 
@@ -140,7 +147,7 @@
         proto.send = function(notification, callback) {
             var identifier = this.idIndex++ + '';
             notification.id = identifier;
-            Cocoon.exec(this.serviceName, 'send', [identifier, notification], callback, callback);
+            Cocoon.exec(this.serviceName, 'send', [notification], successFunc(callback), callback);
             return identifier;
         };
 
@@ -154,7 +161,7 @@
          * - Error.
          */
         proto.subscribe = function(channel, callback) {
-            Cocoon.exec(this.serviceName, 'subscribe', [channel], callback, callback);
+            Cocoon.exec(this.serviceName, 'subscribe', [channel], successFunc(callback), callback);
         };
 
         /**
@@ -167,7 +174,7 @@
          * - Error.
          */
         proto.unsubscribe = function(channel, callback) {
-            Cocoon.exec(this.serviceName, 'unsubscribe', [channel], callback, callback);
+            Cocoon.exec(this.serviceName, 'unsubscribe', [channel], successFunc(callback), callback);
         };
 
         /**

@@ -107,8 +107,8 @@ static BOOL processedLaunchNotifications = NO;
 
 -(void) send:(CDVInvokedUrlCommand *) command
 {
-    NSString * identifier = [command argumentAtIndex:0 withDefault:@"notId" andClass:[NSString class]];
-    NSDictionary * data = [command argumentAtIndex:1 withDefault:@{} andClass:[NSDictionary class]];
+    NSDictionary * data = [command argumentAtIndex:0 withDefault:@{} andClass:[NSDictionary class]];
+    NSString * identifier = [data objectForKey:@"id"] ?: @"notId";
     
     UILocalNotification * notification = [[UILocalNotification alloc] init];
     notification.timeZone = [NSTimeZone defaultTimeZone];

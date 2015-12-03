@@ -141,9 +141,11 @@
             };
             lastNotification = notification;
             targetService.send(notification, function(error){
+
                 if (error) {
                     alert('Error: ' + error.message);
                 }
+
             });
         });
 

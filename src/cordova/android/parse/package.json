@@ -1,0 +1,32 @@
+{
+  "name": "cocoon-plugin-notifications-android-parse",
+  "version": "1.0.0",
+  "description": "Cocoon Parse Push Notifications Plugin",
+  "cordova": {
+    "id": "cocoon-plugin-notifications-android-parse",
+    "platforms": ["android"]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ludei/atomic-plugins-notifications"
+  },
+  "keywords": [
+    "cordova",
+    "notifications",
+    "notification",
+    "parse",
+    "local",
+    "remote",
+    "push",
+    "cocoon",
+    "atomic",
+    "plugins",
+    "ecosystem:cordova"
+  ],
+  "author": "ludei",
+  "license": "MPL 2.0",
+  "bugs": {
+    "url": "https://github.com/ludei/atomic-plugins-notifications/issues"
+  },
+  "homepage": "https://github.com/ludei/atomic-plugins-notifications#readme"
+}

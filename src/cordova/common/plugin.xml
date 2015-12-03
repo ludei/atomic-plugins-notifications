@@ -15,5 +15,10 @@
         <source-file src="src/ios/LDNotificationPlugin.m" />
     </platform>
 
+    <platform name="android">
+        <source-file src="src/android/NotificationPlugin.java" target-dir="src/com/ludei/notifications" />
+        <source-file src="src/android/Notification.java" target-dir="src/com/ludei/notifications" />
+    </platform>
+
     <dependency id="cocoon-plugin-common" />
 </plugin>

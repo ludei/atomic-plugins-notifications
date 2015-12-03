@@ -15,7 +15,7 @@
         <source-file src="src/ios/LDNotificationParsePlugin.m" />
         <framework src="src/ios/Parse.framework" custom="true" />
         <framework src="src/ios/Bolts.framework" custom="true" />
-        <framework src="libsqlite.dylib" />
+        <framework src="libsqlite3.tbd" />
         <framework src="SystemConfiguration.framework" />
 
          <config-file target="config.xml" parent="/*">
