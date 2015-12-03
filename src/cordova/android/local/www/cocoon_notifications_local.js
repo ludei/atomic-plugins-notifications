@@ -1,18 +1,1 @@
-(function(){
-
-    if (window.cordova && typeof require !== 'undefined') {
-        require('cocoon-plugin-notifications-common.Notifications'); //force dependency load
-    }
-    var Cocoon = window.Cocoon;
-
-    /**
-     * Cocoon Local Notifications Implementation
-     * @namespace Cocoon.Notification.Local
-     */
-    Cocoon.define("Cocoon.Notification", function(extension) {
-
-        extension.Local = new Cocoon.Notification.NotificationService('LDNotificationLocalPlugin');
-
-        return extension;
-    });
-})();
+!function(){window.cordova&&"undefined"!=typeof require&&require("cocoon-plugin-notifications-common.Notifications");var o=window.Cocoon;o.define("Cocoon.Notification",function(i){return i.Local=new o.Notification.NotificationService("LDNotificationLocalPlugin"),i})}();

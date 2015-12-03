@@ -6,525 +6,261 @@
     var Cocoon = window.Cocoon;
 
     /**
-    * @fileOverview
-    <h2>About Atomic Plugins</h2>
-    <p>Atomic Plugins provide an elegant and minimalist API and are designed with portability in mind from the beginning. Framework dependencies are avoided by design so the plugins can run on any platform and can be integrated with any app framework or game engine.
-    <br/> <p>You can contribute and help to create more awesome plugins. </p>
-    <h2>Atomic Plugins for InApps</h2>
-    <p>This <a src="https://github.com/ludei/atomic-plugins-inapps">repository</a> contains an in-app purchase API designed using the Atomic Plugins paradigm. You can integrate IAPs in your app and take advantage of all the features provided: elegant API, local and server-side receipt validation, secure consumable and non-consumable purchase tracking, local products cache, etc. The API is already available in many languagues and we plan to add more in the future.</p>
-    <p>Currently there are 3 in-app purchase providers implemented but new ones can be easily added: </p>
-    <ul>
-    <li>Apple AppStore (iOS/Mac).</li>
-    <li>GooglePlay.</li>
-    <li>Amazon AppStore.</li> 
-    </ul>
-    <h3>Setup your project</h3>
-    <p>Releases are deployed to Cordova Plugin Registry. 
-    You only have to install the desired plugins using Cordova CLI, CocoonJS CLI or Cocoon.io Cloud Server.</p>
-    <ul>
-    <code>cordova plugin add com.ludei.inapps.ios.appstore;</code><br/>
-    <code>cordova plugin add com.ludei.inapps.android.googleplay;</code><br/>
-    <code>cordova plugin add con.ludei.inapps.android.amazon;</code><br/>
-    </ul>
-    <p>The following JavaScript files will be included in your html project by default during installation:</p>
-    <ul>
-    <li><a href="https://github.com/ludei/atomic-plugins-inapps/blob/master/src/cordova/js/cocoon_inapps.js">cocoon_inapps.js</a></li>
-    <li><a href="https://github.com/ludei/cocoon-common/blob/master/src/js/cocoon.js">cocoon.js</a></li>
-    </ul>
-    <h3>Documentation</h3>
-    <p>In this section you will find all the documentation you need for using this plugin in your Cordova project. 
-    Select the specific namespace below to open the relevant documentation section:</p>
-    <ul>
-    <li><a href="http://ludei.github.io/cocoon-common/dist/doc/js/Cocoon.html">Cocoon</a></li>
-    <li><a href="Cocoon.InApp.html">InApp</a></li>
-    </ul>
-    <h3>API Reference</h3>
-    <p>For a complete project that tests all the features provided in the API run the following command:</p>
-    <ul><code>gulp create-cordova</code></ul>
-    <br/><p>We hope you find everything you need to get going here, but if you stumble on any problems with the docs or the plugins, 
-    just drop us a line at our forum and we will do our best to help you out.</p>
-    <h3>Tools</h3>
-    <a href="http://support.ludei.com/hc/communities/public/topics"><img src="img/cocoon-tools-1.png" /></a>
-    <a href="https://cocoon.io/doc"><img src="img/cocoon-tools-2.png" /></a>
-    <a href="http://cocoon.io/"><img src="img/cocoon-tools-3.png" /></a>
-    * @version 1.0
-    */
-
-    /**
-     * Cocoon.InApp class provides a multiplatform, easy to use and secure in-app purchase API. 
-     * Built-in support for local and server-side receipt validation, consumable and non-consumable purchase tracking and local products cache. 
-     * Single JavaScript API for multiple IAP providers.
-     *
-     * @namespace Cocoon.InApp
-     * @example
-     * // Basic usage, register callbacks first
-     * service = Cocoon.InApp;
-     * service.on("purchase", {
-     *     start: function(productId) {
-     *         console.log("purchase started " + productId);
-     *     },
-     *     error: function(productId, error) {
-     *         console.log("purchase failed " + productId + " error: " + JSON.stringify(error));
-     *     },
-     *     complete: function(purchase) {
-     *         console.log("purchase completed " + JSON.stringify(purchase));
-     *     }
+     * This namespace represents the Cocoon Notification extension for local and remote notifications.
+     * @namespace Cocoon.Notification
+     * @example 
+     * //Set up notification listener
+     * Cocoon.Notification.Local.on("notification", function(userData){
+     *      console.log("A local notification has been received: " + JSON.stringify(userData));
      * });
      *
-     * // Service initialization
-     * service.initialize({
-     *     autofinish: true
-     * }, 
-     * function(error){
-     *     if(error){
-     *         console.log("Error: " + error);
-     *     }
-     * });
+     * Cocoon.Notification.Local.initialize(); //ready to start receiving notification callbacks
      *
-     * // Fetching products from server 
-     * service.fetchProducts(productIds, function(products, error){
-     *    if(error){
-     *        console.log("Error: " + error);
-     *    }
-     *    else {
-     *        var next = [];
-     *        for (var i = 0; i < products.length; ++i) {
-     *            var product = products[i];
-     *            console.log(product);
-     *        }
-     *    } 
-     * });   
+     *  // Initialize the service. Ready to start receiving notification callbacks
+     *  // Auto register the application to receive notifications. It may show a Dialog to request user permissions.
+     *  // You can disable autoregister witht {register:false} params and call Cocoon.Notification.Local.register() manually
      *
-     * // Purchasing products
-     * service.purchase(product.productId, 3, function(error) { // Optional sugar callback
-     *      if(error){
-     *           console.log("Error: " + error);
-     *      }
-     *      else {
-     *           console.log("Successfully purchased);    
-     *      }
-     * });
+     * Cocoon.Notification.Local.initialize({}, function(registered) {
+     *  if (!registered) {
+     *      alert('Notifications disabled by user')
+     *  }
+     *  else {
+     *      sendNotification(); 
+     *  }
+     * })
+     *
+     * function sendNotification() {
+     *     var notification = {
+     *      message : "Hi, I am a notification",
+     *      soundEnabled : true,
+     *      badgeNumber : 0,
+     *      userData : {"key1" : "value1", "key2": "value2"},
+     *      contentBody : "",
+     *      contentTitle : "",
+     *      date : new Date().valueOf() + 1000
+     *     };
+     *
+     *     Cocoon.Notification.Local.send(notification);
+     * }
      */
-    Cocoon.define("Cocoon.InApp", function(extension) {
+    Cocoon.define("Cocoon.Notification", function(extension) {
         "use strict";
 
-        extension.serviceName = "InAppService";
-        extension.signal = new Cocoon.Signal();
-        extension._canPurchase = true;
-        extension._products = [];
-
-        var stock = {};
-
-        /**
-         * Syncronizes the stock.
-         * @memberof Cocoon.InApp
-         * @function syncStock
-         * @param {object} products An array of products to be syncronized.
-         * @private
-         */
-        function syncStock(products) {
-            for (var i = 0; i < products.length; ++i) {
-                stock[products[i].productId] = products[i].stock;
-                delete products[i].stock;
-            }
+        function NotificationService(serviceName) {
+        	this.serviceName = serviceName;
+        	this.signal = new Cocoon.Signal();
+            this.idIndex = 0;
+            /**
+             * Allows to listen to events when the application receives a notification.
+             * @memberOf Cocoon.Notification
+             * @event On notification
+             * @example
+             * Cocoon.Notification.Local.on("notification", function(data) {
+             *      console.log('Local notification received: ' + JSON.stringify(data));
+             * });
+             * Cocoon.Notification.Parse.on("notification", function(data) {
+             *      console.log('Remote notification received: ' + JSON.stringify(data));
+             * });
+             */
+            this.on = this.signal.expose();
         }
 
-        /**
-         * Adds stock to a product.
-         * @memberof Cocoon.InApp
-         * @function addStock
-         * @param {string} productId The id of the product.
-         * @param {number} n The quantity of product.
-         * @private
-         */
-        function addStock(productId, n) {
-            var value = stock[productId];
-            if (typeof value !== "number") {
-                value = 0;
-            }
-            value += n;
-            if (value < 0) {
-                value = 0;
-            }
-            stock[productId] = value;
-        }
+        extension.NotificationService = NotificationService;
+        var proto = NotificationService.prototype;
 
-        /**
-         * Adds a product.
-         * @memberof Cocoon.InApp
-         * @function addProduct
-         * @param {Cocoon.Inapp.Product} product The product to be added.
-         * @private
-         */
-        function addProduct(product) {
-            for (var i = 0; i < extension._products.length; ++i) {
-                if (extension._products[i].productId === product.productId) {
-                    extension._products[i] = product;
-                    return;
-                }
-            }
-            extension._products.push(product);
-
-        }
-
-        /**
-         * Starts the InApp Service. This will make the system to initialize the InApp callbacks will start to be received after calling this method.
-         * Because of this, you should have set your event handler before calling this method, so you won't lose any callback.
-         * @memberof Cocoon.InApp
-         * @function initialize
-         * @param {Cocoon.InApp.Settings} params The initialization params.
-         * @param {function} callback The callback function.It receives the following parameters:
-         * - Error.
-         * @example
-         * Cocoon.InApp.initialize({
-         *     autofinish: true
-         * }, function(error){
-         *      if(error){
-         *           console.log("Error: " + error);
-         *      }
-         * });
-         */
-        extension.initialize = function(params, callback) {
-
-            Cocoon.exec(this.serviceName, "setListener", [], function(data) {
-
-                var event = data[0];
-                if (event === "start") {
-                    extension.signal.emit("purchase", "start", [data[1]]);
-                } else if (event === "complete") {
-                    var purchase = data[1];
-                    stock[purchase.productId] = data[2];
-                    extension.signal.emit("purchase", "complete", [purchase]);
-                } else if (event == "error") {
-                    var productId = data[1];
-                    var error = data[2];
-                    extension.signal.emit("purchase", "error", [productId, error]);
-                }
-
-            });
-
-            Cocoon.exec(this.serviceName, "initialize", [params], function(data) {
-                extension._canPurchase = data.canPurchase;
-                extension._products = data.products;
-                syncStock(extension._products);
+        //clean unwanted "OK" result param on android
+        function successFunc(callback) {
+            return function() {
                 if (callback) {
-                    callback(data.error);
+                    callback();
+                }
+            };
+        }
+
+        /**
+         * Starts the Notification Service. The notification callbacks will start to be received after calling this method.
+         * Because of this, you should have set your event handler before calling this method, so you won't lose any callback.
+         * @memberof Cocoon.Notification.NotificationService
+         * @function initialize
+         * @param {Object} params. Service dependant params
+         * @param {Function} callback The callback function. It receives the following parameters:
+         * - Registered: True if the devices is already registered to receive notifications
+         * - Error.
+         */
+        proto.initialize = function(params, callback) {
+            var me = this;
+            Cocoon.exec(this.serviceName, "setListener", [], function(data) {
+                me.signal.emit('notification', null, [data]);
+            });
+            Cocoon.exec(this.serviceName, 'initialize', [params], successFunc(callback), function(error){
+                if (callback) {
+                    callback(false, error);
+                }
+            });
+        };
+
+
+        /**
+         * Checks if user has permission to receive notifications
+         * @function canReceiveNotifications
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {Function} callback The callback function. It receives the following parameters:
+         * - granted {Boolean} True if the user has permission to receive notifications
+         */
+        proto.isRegistered = function(callback) {
+            Cocoon.exec(this.serviceName, "isRegistered", [], callback, callback);
+        };
+
+        /**
+         * Registers the application to be able to receive push notifications. In some systems like iOS it shows a dialog to request user permission.
+         * @function register
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {Object} params
+         * @param {Function} callback The callback function. It receives the following parameters:
+         * - Error.
+         */
+        proto.register = function(params, callback) {
+            Cocoon.exec(this.serviceName, 'register', [params], successFunc(callback), callback);
+        };
+
+        /**
+        * Unregisters the application from receiving push notifications
+         * @function unregister
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {Object} params
+         * @param {Function} callback The callback function. It receives the following parameters:
+         * - Error.
+         */
+        proto.unregister = function(callback) {
+            Cocoon.exec(this.serviceName, 'unregister', [], successFunc(callback), callback);
+        };
+
+
+        /**
+         * Send notification
+         * @function send
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {Cocoon.Notification.NotificationInfo} notification The notification to sends
+         * @param {Function} callback The delivery callback function. It receives the following parameters:
+         * - Error.
+         */
+        proto.send = function(notification, callback) {
+            var identifier = this.idIndex++ + '';
+            notification.id = identifier;
+            Cocoon.exec(this.serviceName, 'send', [notification], successFunc(callback), callback);
+            return identifier;
+        };
+
+        /**
+         * Subscribes to a channel in order to receive notifications targeted to that channel.
+         * Valid for notification services that support specific channels (e.g. Parse).
+         * @function subscribe
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {string} channel The channel id
+         * @param {Function} callback The subscribe succeeded callback function. It receives the following parameters:
+         * - Error.
+         */
+        proto.subscribe = function(channel, callback) {
+            Cocoon.exec(this.serviceName, 'subscribe', [channel], successFunc(callback), callback);
+        };
+
+        /**
+         * Unsubscribes from a channel in order to stop receiving notifications targeted to it.
+         * Valid for notification services that support specific channels (e.g. Parse).
+         * @function unsubscribe
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {string} channel The channel id
+         * @param {Function} callback The unsubscribe succeeded callback function. It receives the following parameters:
+         * - Error.
+         */
+        proto.unsubscribe = function(channel, callback) {
+            Cocoon.exec(this.serviceName, 'unsubscribe', [channel], successFunc(callback), callback);
+        };
+
+        /**
+         * Asynchronously get all the channels that this device is subscribed to.
+         * Valid for notification services that support specific channels (e.g. Parse).
+         * @function fetchSubscribedChannels
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {Function} callback Callback function to get the channel list. It receives the following parameters:
+         * - channels {array} the channels that this device is subscribed to
+         * - error.
+         */
+        proto.fetchSubscribedChannels = function(callback) {
+            Cocoon.exec(this.serviceName, 'fetchSubscribedChannels', [], callback, function(error){
+                if (callback) {
+                    callback([], error);
                 }
             });
         };
 
         /**
-         * The object that represents a product in the store.
-         * @memberof Cocoon.InApp
-         * @name Cocoon.InApp.Settings
-         * @property {object} Cocoon.InApp.Settings - The object itself
-         * @property {boolean} Cocoon.InApp.Settings.autofinish If True, the transactions will finish automatically.
+         * Cancels the local notification with Id provided
+         * @function cancel
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {string}  The notification id
          */
-        extension.Settings = {
-            autofinish: "autofinish"
+        proto.cancel = function(notificationId) {
+            Cocoon.exec(this.serviceName, 'cancel', [notificationId]);
         };
 
         /**
-         * This method allows you to check is the  InApp service is available and enabled in this platform.
-         * Not all iOS and Android devices will have the InApp service available or enabled.
-         * so you should check if it is before calling any other method.
-         * @memberof Cocoon.InApp
-         * @function canPurchase
-         * @returns {boolean} True if the service is available and false otherwise.
-         * Cocoon.InApp.canPurchase();
+         * Cancels all the pending notifications
+         * @function cancelAllNotifications
+         * @memberOf Cocoon.Notification.NotificationService
          */
-        extension.canPurchase = function() {
-            return this._canPurchase;
+        proto.cancelAllNotifications = function() {
+            Cocoon.exec(this.serviceName, 'cancelAllNotifications', []);
         };
 
         /**
-         * Fetches the products information from the store.
-         * @memberof Cocoon.InApp
-         * @function fetchProducts
-         * @param {object} productIds Array of ids of products.
-         * @param {function} callback The callback function. 
-         * - An array of {@link Cocoon.InApp.Product}.
-         * - Error. 
-         * @example
-         * Cocoon.InApp.fetchProducts(["magic.sword", "health.potion"], function(products, error){
-         *     if(error){
-         *          console.log("Error: " + error);
-         *     }
-         *     else{
-         *          console.log(JSON.stringify(products));
-         *     }     
-         * });
+         * (iOS only) Sets the badge number for this application.
+         * @function setBadgeNumber
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {number} badgeNumber The badge number
          */
-        extension.fetchProducts = function(productIds, callback) {
-            callback = callback || function() {};
-            return Cocoon.exec(this.serviceName, "fetchProducts", [productIds], function(products) {
-                for (var i = 0; i < products.length; ++i) {
-                    addProduct(products[i]);
-                }
-                syncStock(products);
-                callback(products, null);
-
-            }, function(error) {
-                callback([], error);
-            });
+        proto.setBadgeNumber = function(badgeNumber) {
+            Cocoon.exec(this.serviceName, 'setBadgeNumber', [badgeNumber]);
         };
 
         /**
-         * Returns all the locally cached InApp products.
-         * @memberof Cocoon.InApp
-         * @function getProducts
-         * @returns {object} An array of {@link Cocoon.InApp.Product} that represents all the local products.
-         * @example 
-         * var products = Cocoon.InApp.getProducts();
+         * (iOS only) Gets the current badge number.
+         * @function getBadgeNumber
+         * @memberOf Cocoon.Notification.NotificationService
+         * @param {Function} callback The callback to get badgeNumber. It receives the following parameters:
+         * - badgeNumber.
          */
-        extension.getProducts = function() {
-            return this._products;
+        proto.getBadgeNumber = function(callback) {
+            Cocoon.exec(this.serviceName, 'getBadgeNumber', [], callback);
         };
 
+
         /**
-         * Gets the product information given a product indetifier.
-         * It uses a local cache, so fetchProducts have to be called before if products are not saved from previous execution.
-         * @memberof Cocoon.InApp
-         * @function productForId
-         * @param {string} productId The product id of the product to be checked.
-         * @returns {Cocoon.InApp.Product} The product.
-         * var product = Cocoon.InApp.productForId(productId);
+         * The object that represents the information of a notification.
+         * @memberof Cocoon.Notification
+         * @name Cocoon.Notification.NotificationInfo
+         * @property {object} Cocoon.Notification.NotificationInfo - The object itself
+         * @property {string}   Cocoon.Notification.NotificationInfo.id The notification identifier. Autogenerated.
+         * @property {string}   Cocoon.Notification.NotificationInfo.title The notification message. By default, it will be empty. 
+         * @property {string}   Cocoon.Notification.NotificationInfo.message The notification title. By default, it will be empty. 
+         * @property {boolean}  Cocoon.Notification.NotificationInfo.soundEnabled A flag that indicates if the sound should be enabled for the notification. By default, it will be true. 
+         * @property {number}   Cocoon.Notification.NotificationInfo.badgeNumber The number that will appear in the badge of the application icon in the home screen. By default, it will be 0. 
+         * @property {object}   Cocoon.Notification.NotificationInfo.userData The JSON data to attached to the notification. By default, it will be empty. 
+         * @property {string}   Cocoon.Notification.NotificationInfo.contentBody The body content to be showed in the expanded notification information. By default, it will be empty. 
+         * @property {string}   Cocoon.Notification.NotificationInfo.contentTitle The title to be showed in the expanded notification information. By default, it will be empty. 
+         * @property {number}   Cocoon.Notification.NotificationInfo.date Time in millisecs from 1970 when the notification will be fired. By default, it will be 1 second (1000).
          */
-        extension.productForId = function(productId) {
-            for (var i = 0; i < this._products.length; ++i) {
-                var product = this._products[i];
-                if (product.productId === productId) {
-                    return product;
-                }
-            }
-            return null;
+        extension.NotificationInfo = {
+            id: 0,
+            title: "",
+            message: "",
+            soundEnabled: true,
+            badgeNumber: 0,
+            userData: {},
+            contentBody: "",
+            contentTitle: "",
+            date: 0
         };
-
-        /**
-         * Returns if a product has been already purchased or not.
-         * @memberof Cocoon.InApp
-         * @function isPurchased
-         * @param {string} productId The product id of the product to be checked.
-         * @returns {boolean} A boolean that indicates whether the product has been already purchased.
-         * @example
-         * console.log(Cocoon.InApp.isPurchased(productId));
-         */
-        extension.isPurchased = function(productId) {
-            return this.stockOfProduct(productId) > 0;
-        };
-
-        /**
-         * Returns the quantity of available items for a specific productId.
-         * @memberof Cocoon.InApp
-         * @function stockOfProduct
-         * @param {string} productId The product id of the product to be checked.
-         * @returns {number} A Number that indicates the available quantity of a productId to consume.
-         * @example
-         * console.log(Cocoon.InApp.stockOfProduct(product.productId));
-         */
-        extension.stockOfProduct = function(productId) {
-            var quantity = stock[productId];
-            return typeof quantity === "number" ? quantity : 0;
-        };
-
-        /**
-         * Restores all the purchases from the platform's market.
-         * For each already purchased product the event "purchase" will be called.
-         * @memberof Cocoon.InApp
-         * @function restorePurchases
-         * @param {function} callback The callback function. It receives the following parameters:
-         * - Error.
-         * @example
-         * Cocoon.InApp.restorePurchases(function(error) {
-         *    if (error){
-         *       console.log("Error: " + error);
-         *    } else {
-         *       console.log("Purchases restored");
-         *    }
-         * });
-         */
-        extension.restorePurchases = function(callback) {
-            callback = callback || function() {};
-            Cocoon.exec(this.serviceName, "restorePurchases", [], function() {
-                callback();
-            }, function(error) {
-                callback(error);
-            });
-        };
-
-        /**
-         * Requests a product purchase given its product id.
-         * @memberof Cocoon.InApp
-         * @function purchase
-         * @param {string} productId The id or alias of the product to be purchased.
-         * @param {number} quantity The quantity to be purchased, default value 1.
-         * @param {function} callback The callback function. It receives the following parameters:
-         * - Error.
-         * @example 
-         * Cocoon.InApp.purchase(product.productId, 1, function(error) {
-         *      if(error){
-         *           console.log("Error: " + error);
-         *      }
-         *      else {
-         *           console.log("Successfully purchased);    
-         *      }
-         * });
-         */
-        extension.purchase = function(productId, quantity, callback) {
-            if (typeof quantity !== "number") {
-                quantity = 1;
-            }
-            callback = callback || function() {};
-            Cocoon.exec(this.serviceName, "purchase", [productId, quantity], function() {
-                callback();
-            }, function(error) {
-                callback(error);
-            });
-        };
-
-        /**
-         * Consumes a purchase.
-         * This makes that product to be purchasable again (on Android).
-         * @memberof Cocoon.InApp
-         * @function consume
-         * @param {string} productId The id or alias of the product to be consumed.
-         * @param {number} quantity The quantity to be consumed, default value 1.
-         * @param {function} callback The callback function. It receives the following parameters:
-         * - Consumed - The quantity consumed.
-         * - Error.
-         * @example
-         * Cocoon.InApp.consume(product.productId, 3, function(consumed, error) {
-         *     if(error){
-         *          console.log("Error: " + error);
-         *     }
-         *     else{
-         *          console.log("Consumed items: " + consumed);
-         *     }       
-         * });
-         */
-        extension.consume = function(productId, quantity, callback) {
-            if (typeof quantity !== "number") {
-                quantity = 1;
-            }
-            callback = callback || function() {};
-            Cocoon.exec(this.serviceName, "consume", [productId, quantity], function(consumed) {
-                addStock(productId, -consumed);
-                callback(consumed, null);
-            }, function(error) {
-                callback(0, error);
-            });
-        };
-
-        /**
-         * Finishes a purchase transaction and removes the transaction from the transaction queue.
-         * You don't need to finish purchases if the autoFinishPurchases param is enabled in initialization (enabled by default)
-         * This method must be called after a purchase finishes successfully and the "success"
-         * event inside of the "on purchase products" callback has been received.
-         * If the purchase includes some asset to download from an external server this method must be called after the asset has been successfully downloaded.
-         * If you do not finish the transaction because the asset has not been correctly downloaded the "purchase" event will be called again later on.
-         * @memberof Cocoon.InApp
-         * @function finishPurchase
-         * @param {string} transactionId The transactionId of the purchase to finish.
-         * @example
-         * Cocoon.InApp.finishPurchase(product.TransactionId);
-         */
-        extension.finishPurchase = function(transactionId) {
-            Cocoon.exec(this.serviceName, "finishPurchase", [transactionId]);
-        };
-
-        /**
-         * Sets a custom function to validate purchases with your own server
-         * @memberof Cocoon.InApp
-         * @function setValidationHandler
-         * @param {function} validationHandler
-         * @example
-         * Cocoon.InApp.setValidationHandler(function(receipt, productId, completion){
-         *      ... //Custom validation code
-         *      console.log("Custom validation: " + receipt + " " + productId);
-         *      completion(true); //call completion function with true param if validation succeeds
-         * });
-         */
-        extension.setValidationHandler = function(validationHandler) {
-            var noValidation = !validationHandler;
-            Cocoon.exec(this.serviceName, "setValidationHandler", [noValidation], function(data) {
-
-                var completionId = data[2];
-                validationHandler(data[0], data[1], function(validationResult) {
-                    Cocoon.exec(extension.serviceName, "validationCompletion", [completionId, !!validationResult]);
-                });
-            });
-        };
-
-        /**
-         *
-         * Use Ludei's server to validate purchases.
-         * To enable validation using Ludei's server you first need to create an account in Ludei's Cloud server and create a project with you bundleId.
-         * @memberof Cocoon.InApp
-         * @function setLudeiServerValidationHandler
-         * @example
-         * Cocoon.InApp.setLudeiServerValidationHandler();
-         */
-        extension.setLudeiServerValidationHandler = function() {
-            Cocoon.exec(this.serviceName, "setLudeiServerValidationHandler", []);
-        };
-
-        /**
-         * The object that represents a product in the store.
-         * @memberof Cocoon.InApp
-         * @name Cocoon.InApp.Product
-         * @property {object} Cocoon.InApp.Product - The object itself
-         * @property {string} Cocoon.InApp.Product.productId The id of the product.
-         * @property {string} Cocoon.InApp.Product.title The title of the product.
-         * @property {string} Cocoon.InApp.Product.description The description of the product.
-         * @property {number} Cocoon.InApp.Product.localizedPrice The price of the product in local currency.
-         * @property {number} Cocoon.InApp.Product.price The price of the product.
-         */
-        extension.Product = {
-            productId: "productId",
-            title: "title",
-            description: "description",
-            localizedPrice: "localizedPrice",
-            price: "price"
-        };
-
-        /**
-         * The object that represents the information of a purchase.
-         * @memberof Cocoon.InApp
-         * @name Cocoon.InApp.PurchaseInfo
-         * @property {object} Cocoon.InApp.PurchaseInfo - The object itself
-         * @property {string} Cocoon.InApp.PurchaseInfo.productId The product id of the purchase.
-         * @property {string} Cocoon.InApp.PurchaseInfo.transactionId The transaction id of the purchase.
-         * @property {timestamp} Cocoon.InApp.PurchaseInfo.purchaseDate The date when the purchase was completed.
-         * @property {number} Cocoon.InApp.PurchaseInfo.quantity The number of products of the productId kind purchased in this transaction.
-         */
-        extension.PurchaseInfo = {
-            productId: "productId",
-            transactionId: "transactionId",
-            purchaseDate: "purchaseDate",
-            quantity: "quantity"
-        };
-
-        /**
-         * Allows to listen to events about the purchasing process.
-         * - The callback 'start' receives a parameter the product id of the product being purchased when the purchase of a product starts.
-         * - The callback 'complete' receives as parameter the {@link Cocoon.InApp.PurchaseInfo} object of the product being purchased when the purchase of a product is completed.
-         * - The callback 'error' receives a parameters the product id and an error message when the purchase of a product fails.
-         * @memberOf Cocoon.InApp
-         * @event On purchase
-         * @example
-         * Cocoon.InApp.on("purchase", {
-         *    start: function(productId) {
-         *        console.log("purchase started " + productId);
-         *    },
-         *    error: function(productId, error) {
-         *        console.log("purchase failed " + productId + " error: " + JSON.stringify(error));
-         *    },
-         *    complete: function(purchase) {
-         *        console.log("purchase completed " + JSON.stringify(purchase));
-         *    }
-         * });
-         */
-        extension.on = extension.signal.expose();
 
         return extension;
     });
