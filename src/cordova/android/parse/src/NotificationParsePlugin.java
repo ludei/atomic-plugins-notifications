@@ -1,6 +1,7 @@
 package com.ludei.notifications.parse;
 
 
+import android.app.Application;
 import android.content.Intent;
 
 import com.ludei.notifications.Notification;
@@ -23,8 +24,9 @@ import java.util.ArrayList;
 
 public class NotificationParsePlugin extends NotificationPlugin {
 
+
     private static boolean processedLaunchIntent = false;
-    private static boolean parseInitialized = false;
+    protected static AppState applicationState = AppState.LAUNCH;
 
     public static class ParseNotification extends Notification {
         public int expirationTimeInterval = 0;
@@ -57,6 +59,28 @@ public class NotificationParsePlugin extends NotificationPlugin {
 
     }
 
+    @SuppressWarnings("unused")
+    public static void onApplicationCreate(Application app) {
+        applicationState = AppState.LAUNCH;
+
+        String appId = getStringByKey(app, "parse_app_id");
+        String clientKey = getStringByKey(app, "parse_client_key");
+
+        Parse.enableLocalDatastore(app);
+        Parse.initialize(app, appId, clientKey);
+        ParseInstallation.getCurrentInstallation().saveInBackground();
+    }
+
+    @SuppressWarnings("unused")
+    public static void onApplicationTerminate(Application app) {
+        applicationState = AppState.LAUNCH;
+    }
+
+    private static String getStringByKey(Application app, String key) {
+        int resourceId = app.getResources().getIdentifier(key, "string", app.getPackageName());
+        return app.getString(resourceId);
+    }
+
 	protected void pluginInitialize() {
         super.pluginInitialize();
 
@@ -68,6 +92,8 @@ public class NotificationParsePlugin extends NotificationPlugin {
             }
             processedLaunchIntent = true;
         }
+
+        applicationState = AppState.ACTIVE;
 	}
 
     protected ParseNotification fromIntent(Intent intent) {
@@ -108,34 +134,24 @@ public class NotificationParsePlugin extends NotificationPlugin {
         }
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        applicationState = AppState.ACTIVE;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        applicationState = AppState.BACKGROUND;
+    }
+
     //API
 
     @SuppressWarnings("unused")
     public void initialize(CordovaArgs args, CallbackContext ctx) {
-
-        String appId = null;
-        String clientKey = null;
-
-        try {
-            JSONObject params = args.getJSONObject(0);
-            appId = params.optString("appId");
-            clientKey = params.optString("clientKey");
-        }
-        catch (JSONException ex) {
-            ex.printStackTrace();
-        }
-
-        if (appId == null || clientKey == null || appId.isEmpty() || clientKey.isEmpty()) {
-            ctx.error(this.errorToJSON(0, "Invalid appId or clientId params"));
-            return;
-        }
-
-        if (!parseInitialized) {
-            Parse.initialize(this.cordova.getActivity(), appId, clientKey);
-        }
-        parseInitialized = true; //Avoid reload issues, Parse only allows a single initialization
-        ParseInstallation.getCurrentInstallation().saveInBackground();
-
         ctx.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
         super.start();
     }
@@ -186,8 +202,6 @@ public class NotificationParsePlugin extends NotificationPlugin {
         catch (JSONException ex) {
             ex.printStackTrace();
         }
-
-
 
         push.sendInBackground(new SendCallback() {
             @Override

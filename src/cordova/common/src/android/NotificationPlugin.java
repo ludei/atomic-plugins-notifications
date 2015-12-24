@@ -1,7 +1,4 @@
 package com.ludei.notifications;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CordovaPlugin;
@@ -11,13 +8,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 
 public abstract class NotificationPlugin extends CordovaPlugin {
 
+    public enum AppState {
+        ACTIVE,
+        LAUNCH,
+        BACKGROUND
+    }
 
 	protected ArrayList<Notification> pendingNotifications = new ArrayList<Notification>();
     protected boolean ready = false;
@@ -129,6 +130,19 @@ public abstract class NotificationPlugin extends CordovaPlugin {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public static String fromAppStateToString(NotificationPlugin.AppState state) {
+        switch (state) {
+            case ACTIVE:
+                return "active";
+            case LAUNCH:
+                return "launch";
+            case BACKGROUND:
+                return "background";
+        }
+
+        return "launch";
     }
 
 }

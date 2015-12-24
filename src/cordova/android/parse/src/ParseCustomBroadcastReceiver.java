@@ -1,79 +1,112 @@
 package com.ludei.notifications.parse;
+
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+
+import com.ludei.notifications.NotificationPlugin;
 import com.parse.ParsePushBroadcastReceiver;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Locale;
 
 public class ParseCustomBroadcastReceiver extends ParsePushBroadcastReceiver {
 
-    /*
-    * Custom onReceive test to avoid activity killed when user clicks notification, but doesn't work :-/
-    */
-    /*@Override
-    public void onReceive(Context context, Intent intent) {
+    @Override
+    public void onPushReceive(Context context, Intent intent) {
+        if (intent == null) {
+            return;
+        }
+
+        String extras = intent.getStringExtra("com.parse.Data");
+        JSONObject pushData = null;
         try {
-            if (intent == null) {
-                return;
-            }
+            pushData = new JSONObject(extras);
+            pushData.put("applicationState", NotificationPlugin.fromAppStateToString(NotificationParsePlugin.applicationState));
 
-            String extras = intent.getStringExtra("com.parse.Data");
-            JSONObject pushData = new JSONObject(extras);
-            if (pushData == null || (!pushData.has("alert") && !pushData.has("title"))) {
-                return;
-            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        if (pushData == null || (!pushData.has("alert") && !pushData.has("title"))) {
+            return;
+        }
 
-            ApplicationInfo appInfo = context.getApplicationInfo();
-            String title = pushData.optString("title");
-            if (title == null || title.isEmpty()) {
-                title = context.getPackageManager().getApplicationLabel(appInfo).toString();
-            }
-            String alert = pushData.optString("alert", "Notification received.");
-            String tickerText = String.format(Locale.getDefault(), "%s: %s", title, alert);
+        if (NotificationParsePlugin.applicationState == NotificationPlugin.AppState.ACTIVE) {
+            Intent notificationIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+            Bundle bundle = intent.getExtras();
+            bundle.putString("com.parse.Data", pushData.toString());
+            notificationIntent.putExtras(bundle);
+            context.startActivity(notificationIntent);
 
-            android.app.Notification notification = new android.app.Notification();
+            return;
+        }
+
+        ApplicationInfo appInfo = context.getApplicationInfo();
+        String title = pushData.optString("title");
+        if (title == null || title.isEmpty()) {
+            title = context.getPackageManager().getApplicationLabel(appInfo).toString();
+        }
+
+        Intent notificationIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Bundle bundle = intent.getExtras();
+        bundle.putString("com.parse.Data", pushData.toString());
+        notificationIntent.putExtras(bundle);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        String alert = pushData.optString("alert", "Notification received.");
+        String tickerText = String.format(Locale.getDefault(), "%s: %s", title, alert);
+
+        Notification notification;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            notification = new android.app.Notification();
             notification.tickerText = tickerText;
             notification.flags |= android.app.Notification.FLAG_SHOW_LIGHTS | android.app.Notification.FLAG_AUTO_CANCEL;
             notification.defaults |= android.app.Notification.DEFAULT_LIGHTS | android.app.Notification.DEFAULT_VIBRATE;
             if (pushData.optString("sound") != null) {
                 notification.defaults |= android.app.Notification.DEFAULT_SOUND;
             }
-            notification.icon = appInfo.icon; // getSmallIconId(context, intent);
-            //notification.largeIcon = getLargeIcon(context, intent);
-
-
-            Intent notificationIntent = new Intent(context, Class.forName("com.ludei.devapp.MainActivity"));/// getActivity(context, intent));
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            //notificationIntent.putExtras(intent.getExtras());
-
-            PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            notification.icon = getSmallIconId(context, intent);
+            notification.largeIcon = getLargeIcon(context, intent);
+            notification.contentIntent = contentIntent;
             notification.setLatestEventInfo(context, title, alert, contentIntent);
 
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            // Pick an id that probably won't overlap anything
-            int notificationId = (int)System.currentTimeMillis();
-            notificationManager.notify(notificationId, notification);
+        } else {
+            int defaults = android.app.Notification.DEFAULT_LIGHTS | android.app.Notification.DEFAULT_VIBRATE;
+            if (pushData.optString("sound") != null) {
+                defaults |= android.app.Notification.DEFAULT_SOUND;
+            }
+            notification = new Notification.Builder(context)
+                    .setContentTitle(title)
+                    .setContentText(alert)
+                    .setSmallIcon(getSmallIconId(context, intent))
+                    .setDefaults(defaults)
+                    .setAutoCancel(true)
+                    .setContentIntent(contentIntent)
+                    .build();
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
 
-
-    @Override
-    public void onPushDismiss(Context context, Intent intent)
-    {
-
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        // Pick an id that probably won't overlap anything
+        int notificationId = (int)System.currentTimeMillis();
+        notificationManager.notify(notificationId, notification);
     }
 
     @Override
-    public void onPushOpen(Context context, Intent intent)
-    {
+    public void onPushDismiss(Context context, Intent intent) {
+        super.onPushDismiss(context, intent);
+    }
+
+    @Override
+    public void onPushOpen(Context context, Intent intent) {
         super.onPushOpen(context, intent);
     }
 }

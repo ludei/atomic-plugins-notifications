@@ -8,6 +8,7 @@
     /**
      * This namespace represents the Cocoon Notification extension for local and remote notifications.
      * @namespace Cocoon.Notification
+     *
      * @example 
      * //Set up notification listener
      * Cocoon.Notification.Local.on("notification", function(userData){
@@ -80,7 +81,7 @@
         /**
          * Starts the Notification Service. The notification callbacks will start to be received after calling this method.
          * Because of this, you should have set your event handler before calling this method, so you won't lose any callback.
-         * @memberof Cocoon.Notification.NotificationService
+         * @memberof Cocoon.Notification
          * @function initialize
          * @param {Object} params. Service dependant params
          * @param {Function} callback The callback function. It receives the following parameters:
@@ -103,7 +104,7 @@
         /**
          * Checks if user has permission to receive notifications
          * @function canReceiveNotifications
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {Function} callback The callback function. It receives the following parameters:
          * - granted {Boolean} True if the user has permission to receive notifications
          */
@@ -114,7 +115,7 @@
         /**
          * Registers the application to be able to receive push notifications. In some systems like iOS it shows a dialog to request user permission.
          * @function register
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {Object} params
          * @param {Function} callback The callback function. It receives the following parameters:
          * - Error.
@@ -126,7 +127,7 @@
         /**
         * Unregisters the application from receiving push notifications
          * @function unregister
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {Object} params
          * @param {Function} callback The callback function. It receives the following parameters:
          * - Error.
@@ -139,7 +140,7 @@
         /**
          * Send notification
          * @function send
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {Cocoon.Notification.NotificationInfo} notification The notification to sends
          * @param {Function} callback The delivery callback function. It receives the following parameters:
          * - Error.
@@ -155,7 +156,7 @@
          * Subscribes to a channel in order to receive notifications targeted to that channel.
          * Valid for notification services that support specific channels (e.g. Parse).
          * @function subscribe
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {string} channel The channel id
          * @param {Function} callback The subscribe succeeded callback function. It receives the following parameters:
          * - Error.
@@ -168,7 +169,7 @@
          * Unsubscribes from a channel in order to stop receiving notifications targeted to it.
          * Valid for notification services that support specific channels (e.g. Parse).
          * @function unsubscribe
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {string} channel The channel id
          * @param {Function} callback The unsubscribe succeeded callback function. It receives the following parameters:
          * - Error.
@@ -181,7 +182,7 @@
          * Asynchronously get all the channels that this device is subscribed to.
          * Valid for notification services that support specific channels (e.g. Parse).
          * @function fetchSubscribedChannels
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {Function} callback Callback function to get the channel list. It receives the following parameters:
          * - channels {array} the channels that this device is subscribed to
          * - error.
@@ -197,7 +198,7 @@
         /**
          * Cancels the local notification with Id provided
          * @function cancel
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {string}  The notification id
          */
         proto.cancel = function(notificationId) {
@@ -207,7 +208,7 @@
         /**
          * Cancels all the pending notifications
          * @function cancelAllNotifications
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          */
         proto.cancelAllNotifications = function() {
             Cocoon.exec(this.serviceName, 'cancelAllNotifications', []);
@@ -216,7 +217,7 @@
         /**
          * (iOS only) Sets the badge number for this application.
          * @function setBadgeNumber
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {number} badgeNumber The badge number
          */
         proto.setBadgeNumber = function(badgeNumber) {
@@ -226,7 +227,7 @@
         /**
          * (iOS only) Gets the current badge number.
          * @function getBadgeNumber
-         * @memberOf Cocoon.Notification.NotificationService
+         * @memberOf Cocoon.Notification
          * @param {Function} callback The callback to get badgeNumber. It receives the following parameters:
          * - badgeNumber.
          */

@@ -1,11 +1,6 @@
 package com.ludei.notifications;
 
-import java.util.Map;
-import java.util.Random;
-
-import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.Intent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,7 +33,6 @@ public abstract class Notification {
             json.put("badgeNumber", badgeNumber);
             json.put("icon", icon);
             json.putOpt("userData", userData);
-
         }
         catch (JSONException ex) {
             ex.printStackTrace();

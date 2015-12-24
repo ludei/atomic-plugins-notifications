@@ -11,6 +11,15 @@
     </js-module>
 
     <platform name="android">
+        <preference name="APP_ID" />
+        <preference name="CLIENT_KEY" />
+
+        <source-file src="src/ldparseplugin.xml" target-dir="res/values" />
+        <config-file target="res/values/ldparseplugin.xml" parent="/*">
+            <string name="parse_app_id">$APP_ID</string>
+            <string name="parse_client_key">$CLIENT_KEY</string>
+        </config-file>
+
         <source-file src="src/NotificationParsePlugin.java" target-dir="src/com/ludei/notifications/parse" />
         <source-file src="src/ParseCustomBroadcastReceiver.java" target-dir="src/com/ludei/notifications/parse" />
         
@@ -59,5 +68,6 @@
 
         
         <dependency id="cocoon-plugin-notifications-common" />
+        <dependency id="cocoon-plugin-application-android" />
     </platform>
 </plugin>

@@ -150,7 +150,7 @@ static BOOL pendingRemoteRegisterSettings = NO;
     UIApplication *app = [UIApplication sharedApplication];
     NSString * key = @"applicationState";
     if(app.applicationState == UIApplicationStateInactive) {
-        [dic setObject:@"inactive" forKey:key];
+        [dic setObject:@"launch" forKey:key];
     }
     else if (app.applicationState == UIApplicationStateBackground) {
         [dic setObject:@"background" forKey:key];

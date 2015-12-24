@@ -2,6 +2,7 @@ package com.ludei.notifications.local;
 
 
 import android.app.AlarmManager;
+import android.app.Application;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -30,6 +31,8 @@ public class NotificationLocalPlugin extends NotificationPlugin {
     static final int INTENT_REQUEST_CODE = 0x00024F6;
     private static boolean processedLaunchIntent = false;
 
+    protected static AppState applicationState = AppState.LAUNCH;
+
     public static class LocalNotification extends Notification {
 
         private static int index = 1;
@@ -57,6 +60,15 @@ public class NotificationLocalPlugin extends NotificationPlugin {
         }
     }
 
+    @SuppressWarnings("unused")
+    public static void onApplicationCreate(Application app) {
+        applicationState = AppState.LAUNCH;
+    }
+
+    @SuppressWarnings("unused")
+    public static void onApplicationTerminate(Application app) {
+        applicationState = AppState.LAUNCH;
+    }
 
 	protected void pluginInitialize() {
         super.pluginInitialize();
@@ -76,6 +88,8 @@ public class NotificationLocalPlugin extends NotificationPlugin {
             }
             processedLaunchIntent = true;
         }
+
+        applicationState = AppState.ACTIVE;
 	}
 
     @Override
@@ -110,6 +124,20 @@ public class NotificationLocalPlugin extends NotificationPlugin {
                 this.pendingNotifications.add(notification);
             }
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        applicationState = AppState.ACTIVE;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        applicationState = AppState.BACKGROUND;
     }
 
     //API
