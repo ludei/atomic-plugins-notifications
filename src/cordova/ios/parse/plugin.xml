@@ -11,6 +11,15 @@
     </js-module>
 
     <platform name="ios">
+        <preference name="APP_ID" />
+        <preference name="CLIENT_KEY" />
+        <config-file target="*-Info.plist" parent="ParseAppID">
+            <string>$APP_ID</string>
+        </config-file>
+        <config-file target="*-Info.plist" parent="ParseClientKey">
+            <string>$CLIENT_KEY</string>
+        </config-file>
+
         <header-file src="src/ios/LDNotificationParsePlugin.h" />
         <source-file src="src/ios/LDNotificationParsePlugin.m" />
         <framework src="src/ios/Parse.framework" custom="true" />

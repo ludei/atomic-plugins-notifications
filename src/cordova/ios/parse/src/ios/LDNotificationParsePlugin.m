@@ -49,8 +49,8 @@ static BOOL processedLaunchNotifications = NO;
 -(void) initialize:(CDVInvokedUrlCommand *) command
 {
     NSDictionary * params = [command argumentAtIndex:0 withDefault:@{} andClass:[NSDictionary class]];
-    NSString * appId = [params objectForKey:@"appId"];
-    NSString * clientKey = [params objectForKey:@"clientKey"];
+    NSString * appId  = [[NSBundle mainBundle].infoDictionary objectForKey:@"ParseAppID"];
+    NSString * clientKey  = [[NSBundle mainBundle].infoDictionary objectForKey:@"ParseClientKey"];
     
     if (appId.length == 0 || clientKey.length == 0) {
         CDVPluginResult * result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:@{@"code":@0, @"message":@"appId or clientKey parameters not specified"}];
