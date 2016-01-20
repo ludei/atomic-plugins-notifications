@@ -16,8 +16,9 @@
      * });
      *
      * // Initialize the service. Ready to start receiving notification callbacks
-     * // You can make the service to be registered automatically after calling initialize passing a {register: false} paramter. It may show a Dialog to request user permissions.
+     * // The service can be automatically registered after the initialization. This may show a Dialog to request user permissions.
      * // You can disable autoregister with {register: false} params and call Cocoon.Notification.Local.register() manually to control when the permissions dialog is shown.
+     * // By default the register paramter is set to true.
      *
      * Cocoon.Notification.Local.initialize({register: false}, function(registered) {
      *  if (!registered) {
