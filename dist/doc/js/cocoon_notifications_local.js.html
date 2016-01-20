@@ -120,10 +120,10 @@
      * });
      *
      * // Initialize the service. Ready to start receiving notification callbacks
-     * // Auto register the application to receive notifications. It may show a Dialog to request user permissions.
-     * // You can disable autoregister witht {register:false} params and call Cocoon.Notification.Local.register() manually
+     * // You can make the service to be registered automatically after calling initialize passing a {register: false} paramter. It may show a Dialog to request user permissions.
+     * // You can disable autoregister with {register: false} params and call Cocoon.Notification.Local.register() manually to control when the permissions dialog is shown.
      *
-     * Cocoon.Notification.Local.initialize({appId:'aaaa', clientKey:'xxxx'}, function(registered) {
+     * Cocoon.Notification.Local.initialize({register: false}, function(registered) {
      *  if (!registered) {
      *      alert('Local notifications disabled by user')
      *  }
