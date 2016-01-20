@@ -53,5 +53,3 @@ build/
 
 test/cordova/AdTest
 node_modules
-
-dist/cpp

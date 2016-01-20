@@ -6,6 +6,33 @@
     var Cocoon = window.Cocoon;
 
     /**
+    * @fileOverview
+    <h2>About Atomic Plugins</h2>
+    <p>Atomic Plugins provide an elegant and minimalist API and are designed with portability in mind from the beginning. Framework dependencies are avoided by design so the plugins can run on any platform and can be integrated with any app framework or game engine.
+    <br/> <p>You can contribute and help to create more awesome plugins. </p>
+    <h2>Atomic Plugins for Notifications</h2>
+    <p>This <a src="https://github.com/ludei/atomic-plugins-notifications">repository</a> contains a Notifications API designed using the Atomic Plugins paradigm. The API is already available in many languagues and we plan to add more in the future.</p>
+    <h3>Setup your project</h3>
+    <p>Releases are deployed to Cordova Plugin Registry. 
+    You only have to install the desired plugins using Cordova CLI and <a href="https://cocoon.io"/>Cocoon Cloud service</a>.</p>
+    <ul>
+    <code>cordova plugin add cocoon-plugin-notifications-android-local</code><br/>
+    <code>cordova plugin add cocoon-plugin-notifications-android-parse</code><br/>
+    <code>cordova plugin add cocoon-plugin-notifications-ios-local</code><br/>
+    <code>cordova plugin add cocoon-plugin-notifications-ios-parse</code><br/>
+    </ul>
+    <h3>Documentation</h3>
+    <p>In this section you will find all the documentation you need for using this plugin in your Cordova project. 
+    Select the specific namespace below to open the relevant documentation section:</p>
+    <ul>
+    <li><a href="http://ludei.github.io/atomic-plugins-docs/dist/doc/js/Cocoon.Notifications.html">Notifications</a></li>
+    <li><a href="http://ludei.github.io/atomic-plugins-docs/dist/doc/js/Cocoon.Notifications.Local.html">Local Notifications</a></li>
+    <li><a href="http://ludei.github.io/atomic-plugins-docs/dist/doc/js/Cocoon.Notifications.Parse.html">Parse Notifications</a></li>
+    </ul>
+    * @version 1.0
+    */
+
+    /**
      * This namespace represents the Cocoon Notification extension for local and remote notifications.
      * @namespace Cocoon.Notification
      *
