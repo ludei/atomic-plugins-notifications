@@ -15,7 +15,7 @@ public abstract class Notification {
 	public long date;
 	public int badgeNumber;
 	public JSONObject userData;
-    public int icon;
+    public String icon;
     public PendingIntent pendingIntent;
 
     private static final String NOTIFICATION_EXTRA = "com.ludei.notifications.extra";
@@ -49,7 +49,7 @@ public abstract class Notification {
         this.date = json.optLong("date", this.date);
         this.badgeNumber = json.optInt("badgeNumber", this.badgeNumber);
         this.userData = json.optJSONObject("userData");
-        this.icon = json.optInt("icon", this.icon);
+        this.icon = json.optString("icon", this.icon);
     }
 
 }

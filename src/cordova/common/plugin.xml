@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="cocoon-plugin-notifications-common" version="1.0.0">
+        id="cocoon-plugin-notifications-common" version="1.0.3">
     <name>CocoonNotificationsCommon</name>
     <description>Cocoon Local and Remote Notifications API</description>
     <license>MPL 2.0</license>
