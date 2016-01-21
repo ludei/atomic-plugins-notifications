@@ -170,7 +170,8 @@ public class NotificationLocalPlugin extends NotificationPlugin {
 
             try {
                 int resourceId = cordova.getActivity().getResources().getIdentifier(notification.icon, "drawable", cordova.getActivity().getComponentName().getPackageName());
-                notification.icon = String.valueOf(resourceId);
+                if (resourceId != 0)
+                    notification.icon = String.valueOf(resourceId);
 
             } catch(Exception e) {
                 notification.icon = String.valueOf(applicationInfo.icon);

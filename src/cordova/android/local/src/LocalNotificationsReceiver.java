@@ -34,9 +34,7 @@ public class LocalNotificationsReceiver extends BroadcastReceiver {
 				userData.put("applicationState", NotificationPlugin.fromAppStateToString(NotificationLocalPlugin.applicationState));
 				extra = obj.toString();
 
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			} catch (JSONException e) {}
 			data.fromJSONObject(obj);
 		}
 

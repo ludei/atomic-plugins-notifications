@@ -71,7 +71,8 @@ public class ParseCustomBroadcastReceiver extends ParsePushBroadcastReceiver {
             String icon = pushData.getString("icon");
             if (!icon.isEmpty()) {
                 int resourceId = context.getResources().getIdentifier(icon, "drawable", context.getPackageName());
-                iconResId = resourceId;
+                if (resourceId != 0)
+                    iconResId = resourceId;
             }
 
         } catch(Exception e) {}
