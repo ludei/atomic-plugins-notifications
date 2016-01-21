@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -65,6 +66,16 @@ public class ParseCustomBroadcastReceiver extends ParsePushBroadcastReceiver {
         String alert = pushData.optString("alert", "Notification received.");
         String tickerText = String.format(Locale.getDefault(), "%s: %s", title, alert);
 
+        int iconResId = getSmallIconId(context, intent);
+        try {
+            String icon = pushData.getString("icon");
+            if (!icon.isEmpty()) {
+                int resourceId = context.getResources().getIdentifier(icon, "drawable", context.getPackageName());
+                iconResId = resourceId;
+            }
+
+        } catch(Exception e) {}
+
         Notification notification;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             notification = new android.app.Notification();
@@ -74,7 +85,7 @@ public class ParseCustomBroadcastReceiver extends ParsePushBroadcastReceiver {
             if (pushData.optString("sound") != null) {
                 notification.defaults |= android.app.Notification.DEFAULT_SOUND;
             }
-            notification.icon = getSmallIconId(context, intent);
+            notification.icon = iconResId;
             notification.largeIcon = getLargeIcon(context, intent);
             notification.contentIntent = contentIntent;
             notification.setLatestEventInfo(context, title, alert, contentIntent);
@@ -87,7 +98,8 @@ public class ParseCustomBroadcastReceiver extends ParsePushBroadcastReceiver {
             notification = new Notification.Builder(context)
                     .setContentTitle(title)
                     .setContentText(alert)
-                    .setSmallIcon(getSmallIconId(context, intent))
+                    .setSmallIcon(iconResId)
+                    .setLargeIcon(getLargeIcon(context, intent))
                     .setDefaults(defaults)
                     .setAutoCancel(true)
                     .setContentIntent(contentIntent)

@@ -66,7 +66,7 @@ public class LocalNotificationsReceiver extends BroadcastReceiver {
 			if (data.soundEnabled) {
 				notification.defaults |= android.app.Notification.DEFAULT_SOUND;
 			}
-			notification.icon = data.icon;
+			notification.icon = Integer.parseInt(data.icon);
 			notification.contentIntent = contentIntent;
 			notification.setLatestEventInfo(context, data.message, contentBody, contentIntent);
 
@@ -78,7 +78,7 @@ public class LocalNotificationsReceiver extends BroadcastReceiver {
 			notification = new Notification.Builder(context)
 					.setContentTitle(data.message)
 					.setContentText(contentBody)
-					.setSmallIcon(data.icon)
+					.setSmallIcon(Integer.parseInt(data.icon))
 					.setDefaults(defaults)
 					.setAutoCancel(true)
 					.setContentIntent(contentIntent)

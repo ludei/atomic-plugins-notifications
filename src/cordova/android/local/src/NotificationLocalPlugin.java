@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 
 import com.ludei.notifications.Notification;
 import com.ludei.notifications.NotificationPlugin;
@@ -166,7 +167,15 @@ public class NotificationLocalPlugin extends NotificationPlugin {
         try {
             PackageManager pm = cordova.getActivity().getPackageManager();
             ApplicationInfo applicationInfo = pm.getApplicationInfo(cordova.getActivity().getComponentName().getPackageName(), PackageManager.GET_META_DATA);
-            notification.icon = applicationInfo.icon;
+
+            try {
+                int resourceId = cordova.getActivity().getResources().getIdentifier(notification.icon, "drawable", cordova.getActivity().getComponentName().getPackageName());
+                notification.icon = String.valueOf(resourceId);
+
+            } catch(Exception e) {
+                notification.icon = String.valueOf(applicationInfo.icon);
+            }
+
             if (notification.contentTitle == null || notification.contentTitle.isEmpty()) {
                 notification.contentTitle = pm.getApplicationLabel(applicationInfo).toString();
             }

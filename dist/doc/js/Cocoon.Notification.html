@@ -160,8 +160,9 @@ Cocoon.Notification.Local.on("notification", function(userData){
 Cocoon.Notification.Local.initialize(); //ready to start receiving notification callbacks
 
 // Initialize the service. Ready to start receiving notification callbacks
-// Auto register the application to receive notifications. It may show a Dialog to request user permissions.
-// You can disable autoregister witht {register:false} params and call Cocoon.Notification.Local.register() manually
+// The service will be automatically registered after the initialization. This may show a Dialog to request user permissions.
+// You can disable autoregister with {register: false} params and call Cocoon.Notification.Local.register() manually to control when the permissions dialog is shown.
+// By default the register parameter is set to true.
 
 Cocoon.Notification.Local.initialize({}, function(registered) {
 if (!registered) {
@@ -181,6 +182,7 @@ function sendNotification() {
     contentBody : "",
     contentTitle : "",
     date : new Date().valueOf() + 1000
+    icon : "myicon"
    };
 
    Cocoon.Notification.Local.send(notification);
@@ -744,8 +746,9 @@ Valid for notification services that support specific channels (e.g. Parse).</p>
     <div class="description">
         <p>Starts the Notification Service. The notification callbacks will start to be received after calling this method.
 Because of this, you should have set your event handler before calling this method, so you won't lose any callback.
-You can make the service to be registered automatically after calling initialize passing a {register: false} paramter. It may show a Dialog to request user permissions.
-You can disable autoregister with {register: false} params and call Cocoon.Notification.Local.register() manually to control when the permissions dialog is shown.</p>
+The service will be automatically registered after the initialization. This may show a Dialog to request user permissions.
+You can disable autoregister with {register: false} params and call Cocoon.Notification.Local.register() manually to control when the permissions dialog is shown.
+By default the register parameter is set to true.</p>
     </div>
     
 
@@ -2045,6 +2048,29 @@ Cocoon.Notification.Parse.on("notification", function(data) {
             
 
             <td class="description last"><p>Time in millisecs from 1970 when the notification will be fired. By default, it will be 1 second (1000).</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>icon</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>(Optional) Name of the custom icon that you have bundled in the application as a resource (You need a plugin to be able to bundle resources in the app).</p></td>
         </tr>
 
 	

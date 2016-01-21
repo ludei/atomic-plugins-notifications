@@ -198,6 +198,11 @@ public class NotificationParsePlugin extends NotificationPlugin {
             }
             userData.put("alert", notification.message != null ? notification.message : "");
             push.setData(userData);
+
+            if (notification.icon != null) {
+                userData.put("icon", notification.icon);
+                push.setData(userData);
+            }
         }
         catch (JSONException ex) {
             ex.printStackTrace();
