@@ -150,6 +150,8 @@ static BOOL processedLaunchNotifications = NO;
     else {
         [[UIApplication sharedApplication] presentLocalNotificationNow:notification];
     }
+    
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
 }
 
 -(void) subscribe:(CDVInvokedUrlCommand *) command
