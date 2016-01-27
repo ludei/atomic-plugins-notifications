@@ -38,15 +38,17 @@ public class LocalNotificationsReceiver extends BroadcastReceiver {
 			data.fromJSONObject(obj);
 		}
 
+		String activityClassName = intent.getStringExtra(NotificationLocalPlugin.NOTIFICATION_EXTRA_ACTIVITY);
 		if (NotificationLocalPlugin.applicationState == NotificationPlugin.AppState.ACTIVE) {
-			Intent notificationIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+			Intent notificationIntent = new Intent().setClassName(context, activityClassName);
+			notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
 			notificationIntent.putExtra(NotificationLocalPlugin.NOTIFICATION_EXTRA_JSON, obj.toString());
 			context.startActivity(notificationIntent);
 
 			return;
 		}
 
-		Intent notificationIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+		Intent notificationIntent = new Intent().setClassName(context, activityClassName);
 		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		notificationIntent.putExtra(NotificationLocalPlugin.NOTIFICATION_EXTRA_JSON, extra);
 

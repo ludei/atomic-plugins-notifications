@@ -6,10 +6,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.res.Resources;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.ludei.notifications.NotificationPlugin;
 import com.parse.ParsePushBroadcastReceiver;
@@ -41,7 +40,19 @@ public class ParseCustomBroadcastReceiver extends ParsePushBroadcastReceiver {
         }
 
         if (NotificationParsePlugin.applicationState == NotificationPlugin.AppState.ACTIVE) {
-            Intent notificationIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+            Intent notificationIntent = null;
+            try {
+                String packageName = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).packageName;
+                notificationIntent = new Intent(packageName + ".ludei.notifications.OPEN");
+
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            if (notificationIntent == null)
+                return;
+
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
             Bundle bundle = intent.getExtras();
             bundle.putString("com.parse.Data", pushData.toString());
             notificationIntent.putExtras(bundle);
@@ -56,7 +67,18 @@ public class ParseCustomBroadcastReceiver extends ParsePushBroadcastReceiver {
             title = context.getPackageManager().getApplicationLabel(appInfo).toString();
         }
 
-        Intent notificationIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        Intent notificationIntent = null;
+        try {
+            String packageName = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).packageName;
+            notificationIntent = new Intent(packageName + ".ludei.notifications.OPEN");
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (notificationIntent == null)
+            return;
+
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         Bundle bundle = intent.getExtras();
         bundle.putString("com.parse.Data", pushData.toString());
