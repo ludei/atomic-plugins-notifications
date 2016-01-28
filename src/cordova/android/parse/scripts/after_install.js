@@ -15,7 +15,11 @@ module.exports = function(context) {
 
     var activities = etree.findall('./application/activity');
     for (var i=0; i<activities.length; i++) {
+
         for (var j=0; j<activities[i].len(); j++) {
+            if (activities[i].get('android:name').indexOf("com.ludei.devapplib.android.DevAppActivity") === 0)
+                continue;
+
             var item = activities[i].getItem(j);
             if (item.tag === "intent-filter") {
                 var category = item.find('category');
