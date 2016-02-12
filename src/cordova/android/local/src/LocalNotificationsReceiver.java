@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 
 import com.ludei.notifications.NotificationPlugin;
 
@@ -54,21 +55,21 @@ public class LocalNotificationsReceiver extends BroadcastReceiver {
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 		String contentBody = data.contentBody == null ? "" : data.contentBody;
-		String tickerText = String.format(Locale.getDefault(), "%s: %s", data.message, contentBody);
 
 		Notification notification;
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-			notification = new android.app.Notification();
-			notification.when = data.date;
-			notification.tickerText = tickerText;
-			notification.flags |= android.app.Notification.FLAG_SHOW_LIGHTS | android.app.Notification.FLAG_AUTO_CANCEL;
-			notification.defaults |= android.app.Notification.DEFAULT_LIGHTS | android.app.Notification.DEFAULT_VIBRATE;
+			int defaults = android.app.Notification.DEFAULT_LIGHTS | android.app.Notification.DEFAULT_VIBRATE;
 			if (data.soundEnabled) {
-				notification.defaults |= android.app.Notification.DEFAULT_SOUND;
+				defaults |= android.app.Notification.DEFAULT_SOUND;
 			}
-			notification.icon = Integer.parseInt(data.icon);
-			notification.contentIntent = contentIntent;
-			notification.setLatestEventInfo(context, data.message, contentBody, contentIntent);
+			notification = new NotificationCompat.Builder(context)
+					.setContentTitle(data.message)
+					.setContentText(contentBody)
+					.setSmallIcon(Integer.parseInt(data.icon))
+					.setDefaults(defaults)
+					.setAutoCancel(true)
+					.setContentIntent(contentIntent)
+					.build();
 
 		} else {
 			int defaults = android.app.Notification.DEFAULT_LIGHTS | android.app.Notification.DEFAULT_VIBRATE;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="cocoon-plugin-notifications-common" version="1.0.3">
+        id="cocoon-plugin-notifications-common" version="1.0.4">
     <name>CocoonNotificationsCommon</name>
     <description>Cocoon Local and Remote Notifications API</description>
     <license>MPL 2.0</license>
@@ -18,6 +18,8 @@
     <platform name="android">
         <source-file src="src/android/NotificationPlugin.java" target-dir="src/com/ludei/notifications" />
         <source-file src="src/android/Notification.java" target-dir="src/com/ludei/notifications" />
+
+        <framework src="src/android/libs/notifications.gradle" custom="true" type="gradleReference" />
     </platform>
 
     <dependency id="cocoon-plugin-common" />

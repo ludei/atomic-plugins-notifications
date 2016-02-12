@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="cocoon-plugin-notifications-android-local" version="1.0.3">
+        id="cocoon-plugin-notifications-android-local" version="1.0.4">
     <name>CocoonNotificationsLocal</name>
     <description>Cocoon Local Notifications API</description>
     <license>MPL 2.0</license>
@@ -25,7 +25,6 @@
             </feature>
         </config-file>
 
-        
         <dependency id="cocoon-plugin-notifications-common" />
     </platform>
 </plugin>

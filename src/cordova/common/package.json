@@ -1,6 +1,6 @@
 {
   "name": "cocoon-plugin-notifications-common",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Cocoon Local and Remote Notifications API",
   "cordova": {
     "id": "cocoon-plugin-notifications-common",
