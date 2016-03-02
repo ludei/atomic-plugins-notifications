@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="cocoon-plugin-notifications-android-parse" version="1.0.7">
+        id="cocoon-plugin-notifications-android-parse" version="1.0.8">
     <name>CocoonNotificationsParse</name>
     <description>Cocoon Parse Push Notifications API</description>
     <license>MPL 2.0</license>
@@ -11,7 +11,7 @@
     </js-module>
 
     <platform name="android">
-        <hook type="after_plugin_install" src="scripts/after_install.js" />
+        <hook type="before_compile" src="scripts/before_compile.js" />
         
         <preference name="APP_ID" />
         <preference name="CLIENT_KEY" />
@@ -40,7 +40,6 @@
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
             <uses-permission android:name="android.permission.WAKE_LOCK" />
             <uses-permission android:name="android.permission.VIBRATE" />
-            <uses-permission android:name="android.permission.GET_ACCOUNTS" />
             <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
             <permission android:protectionLevel="signature"
                 android:name="$PACKAGE_NAME.permission.C2D_MESSAGE" />
