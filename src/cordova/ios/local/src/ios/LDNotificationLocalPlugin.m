@@ -113,7 +113,9 @@ static BOOL processedLaunchNotifications = NO;
     UILocalNotification * notification = [[UILocalNotification alloc] init];
     notification.timeZone = [NSTimeZone defaultTimeZone];
     notification.alertBody = [data objectForKey:@"message"] ?: @"";
-    notification.alertTitle = [data objectForKey:@"title"] ?: @"";
+    if ([notification respondsToSelector:@selector(alertTitle)]) {
+        notification.alertTitle = [data objectForKey:@"title"] ?: @"";
+    }
     NSNumber * soundEnabled = [data objectForKey:@"soundEnabled"];
     if (soundEnabled && [soundEnabled isKindOfClass:[NSNumber class]]) {
         notification.soundName = soundEnabled.boolValue ? UILocalNotificationDefaultSoundName : nil;
