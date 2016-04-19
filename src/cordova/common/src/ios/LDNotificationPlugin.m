@@ -99,7 +99,9 @@ static BOOL pendingRemoteRegisterSettings = NO;
     if (!pendingAppRegisterSettings) {
         pendingAppRegisterSettings = YES;
         [_settingsRegisterHandlers addObject:handler];
-        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+        if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
+            [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+        }
     }
 }
 
