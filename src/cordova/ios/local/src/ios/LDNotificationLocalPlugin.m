@@ -13,6 +13,17 @@ static BOOL processedLaunchNotifications = NO;
     [super pluginInitialize];
     _scheduledNotifications = [[NSMutableDictionary alloc] init];
     
+    // load scheduled notifications
+    NSArray<UILocalNotification *> *scheduled = [UIApplication sharedApplication].scheduledLocalNotifications;
+    for (UILocalNotification *notification in scheduled) {
+        NSMutableDictionary * userInfo = [NSMutableDictionary dictionaryWithDictionary: notification.userInfo ?: @{}];
+        NSString *identifier = [userInfo objectForKey:COCOON_NOTIFICATION_ID];
+        // place it back into the scheduledNotifications dict
+        if (identifier && [identifier isKindOfClass:[NSString class]]) {
+            [_scheduledNotifications setObject:notification forKey:identifier];
+        }
+    }
+
     if (!processedLaunchNotifications) {
         NSDictionary * launchOptions = [CDVAppDelegate launchOptions];
         if (launchOptions) {
