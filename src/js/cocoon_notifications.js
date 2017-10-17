@@ -79,7 +79,7 @@
         function NotificationService(serviceName) {
         	this.serviceName = serviceName;
         	this.signal = new Cocoon.Signal();
-            this.idIndex = 0;
+            this.idIndex = Date.now();
             /**
              * Allows to listen to events when the application receives a notification.
              * @memberOf Cocoon.Notification
