@@ -2,6 +2,7 @@ package com.ludei.notifications.local;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -57,7 +58,20 @@ public class LocalNotificationsReceiver extends BroadcastReceiver {
 		String contentBody = data.contentBody == null ? "" : data.contentBody;
 
 		Notification notification;
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+			/* Create or update. */
+			NotificationChannel channel = new NotificationChannel(
+				"my_channel_01",
+				"Game Notifications", 
+				NotificationManager.IMPORTANCE_DEFAULT
+			);
+			notificationManager.createNotificationChannel(channel);
+		}
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
 			int defaults = android.app.Notification.DEFAULT_LIGHTS | android.app.Notification.DEFAULT_VIBRATE;
 			if (data.soundEnabled) {
 				defaults |= android.app.Notification.DEFAULT_SOUND;
@@ -70,7 +84,6 @@ public class LocalNotificationsReceiver extends BroadcastReceiver {
 					.setAutoCancel(true)
 					.setContentIntent(contentIntent)
 					.build();
-
 		} else {
 			int defaults = android.app.Notification.DEFAULT_LIGHTS | android.app.Notification.DEFAULT_VIBRATE;
 			if (data.soundEnabled) {
@@ -83,10 +96,10 @@ public class LocalNotificationsReceiver extends BroadcastReceiver {
 					.setDefaults(defaults)
 					.setAutoCancel(true)
 					.setContentIntent(contentIntent)
+					.setChannelId("my_channel_01")
 					.build();
 		}
 
-		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		notificationManager.notify(data.cocoonId, notification);
 	}
 
