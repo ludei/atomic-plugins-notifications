@@ -1,6 +1,6 @@
 {
   "name": "cocoon-plugin-notifications-android-local",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Cocoon Local Notifications Plugin",
   "cordova": {
     "id": "cocoon-plugin-notifications-android-local",
