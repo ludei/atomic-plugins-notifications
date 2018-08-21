@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="cocoon-plugin-notifications-android-local" version="1.0.5">
+        id="cocoon-plugin-notifications-android-local" version="2.0.0">
     <name>CocoonNotificationsLocal</name>
     <description>Cocoon Local Notifications API</description>
     <license>MPL 2.0</license>
     <keywords>cordova,inapps,push,notification,local,remote,cocoon,atomic,plugins</keywords>
-    <repo>https://github.com/ludei/atomic-plugins-notifications</repo>    
+    <repo>https://github.com/ludei/atomic-plugins-notifications</repo>
     <js-module src="www/cocoon_notifications_local.js" name="Notifications">
         <runs/>
     </js-module>
@@ -14,17 +14,17 @@
         <source-file src="src/NotificationLocalPlugin.java" target-dir="src/com/ludei/notifications/local" />
         <source-file src="src/LocalNotificationsReceiver.java" target-dir="src/com/ludei/notifications/local" />
 
-        <config-file target="AndroidManifest.xml" parent="/manifest/application">
-                <receiver
-            android:name="com.ludei.notifications.local.LocalNotificationsReceiver" />
+        <config-file target="app/src/main/AndroidManifest.xml" parent="/manifest/application">
+            <receiver
+                    android:name="com.ludei.notifications.local.LocalNotificationsReceiver" />
         </config-file>
 
-        <config-file target="res/xml/config.xml" parent="/*">
-            <feature name="LDNotificationLocalPlugin" >
-                <param name="android-package" value="com.ludei.notifications.local.NotificationLocalPlugin"/>
+        <config-file target="app/src/main/res/xml/config.xml" parent="/*">
+            <feature name="LDNotificationLocalPlugin">
+                <param name="android-package" value="com.ludei.notifications.local.NotificationLocalPlugin" />
             </feature>
         </config-file>
 
-        <dependency id="cocoon-plugin-notifications-common" version="1.0.6" />
+        <dependency id="cocoon-plugin-notifications-common" />
     </platform>
 </plugin>

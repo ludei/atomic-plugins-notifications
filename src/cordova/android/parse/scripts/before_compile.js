@@ -7,7 +7,7 @@ module.exports = function(context) {
     if (context.opts.cordova.platforms.indexOf('android') <= -1)
         return;
 
-    var manifest_xml = path.join(context.opts.projectRoot, 'platforms', 'android','AndroidManifest.xml');
+    var manifest_xml = path.join(context.opts.projectRoot, 'platforms', 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
     var et = context.requireCordovaModule('elementtree');
 
     var data = fs.readFileSync(manifest_xml).toString();

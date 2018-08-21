@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="cocoon-plugin-notifications-android-parse" version="1.0.9">
+        id="cocoon-plugin-notifications-android-parse" version="2.0.0">
     <name>CocoonNotificationsParse</name>
     <description>Cocoon Parse Push Notifications API</description>
     <license>MPL 2.0</license>
@@ -17,7 +17,7 @@
         <preference name="CLIENT_KEY" />
 
         <source-file src="src/ldparseplugin.xml" target-dir="res/values" />
-        <config-file target="res/values/ldparseplugin.xml" parent="/*">
+        <config-file target="app/src/main/res/values/ldparseplugin.xml" parent="/*">
             <string name="parse_app_id">$APP_ID</string>
             <string name="parse_client_key">$CLIENT_KEY</string>
         </config-file>
@@ -28,13 +28,13 @@
         <framework src="com.parse.bolts:bolts-android:1.+" />
         <framework src="com.parse:parse-android:1.+" />
 
-        <config-file target="res/xml/config.xml" parent="/*">
+        <config-file target="app/src/main/res/xml/config.xml" parent="/*">
             <feature name="LDNotificationParsePlugin">
                 <param name="android-package" value="com.ludei.notifications.parse.NotificationParsePlugin" />
             </feature>
         </config-file>
 
-        <config-file target="AndroidManifest.xml" parent="/manifest">
+        <config-file target="app/src/main/AndroidManifest.xml" parent="/manifest">
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
             <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -45,7 +45,7 @@
             <uses-permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE" />
         </config-file>
 
-        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+        <config-file target="app/src/main/AndroidManifest.xml" parent="/manifest/application">
             <service android:name="com.parse.PushService" />
             <receiver android:name="com.ludei.notifications.parse.ParseCustomBroadcastReceiver"
                       android:exported="false">
@@ -60,13 +60,12 @@
                 <intent-filter>
                     <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                     <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
                     <category android:name="$PACKAGE_NAME" />
                 </intent-filter>
             </receiver>
         </config-file>
 
-        <dependency id="cocoon-plugin-notifications-common" version="1.0.6" />
-        <dependency id="cocoon-plugin-application-android" version="1.0.3" />
+        <dependency id="cocoon-plugin-notifications-common" />
+        <dependency id="cocoon-plugin-application-android" />
     </platform>
 </plugin>

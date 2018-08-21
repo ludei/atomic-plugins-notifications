@@ -1,6 +1,6 @@
 {
   "name": "cocoon-plugin-notifications-android-parse",
-  "version": "1.0.9",
+  "version": "2.0.0",
   "description": "Cocoon Parse Push Notifications Plugin",
   "cordova": {
     "id": "cocoon-plugin-notifications-android-parse",
